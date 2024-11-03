@@ -4,6 +4,7 @@
 #include <fstream>
 #include <unistd.h>
 
+
 #ifdef _WIN32
     #include <windows.h>
 #else
@@ -209,10 +210,11 @@ int main(){
         std::cout<<"                     VIAJES Y TAL S.A                    "<<std::endl;
         std::cout<<"     ==============================================      "<<std::endl<<std::endl;
 
-        std::cout<<"Bienvenido usuario, por favor seleccione la opcion deseada: ";
+        std::cout<<"Bienvenido usuario, por favor seleccione la opción deseada: ";
         std::cout<<std::endl<<"Gestión de datos (1). "
                 <<std::endl<<"Reportes (2). "
-                <<std::endl<<"Consultas (3). "<<std::endl;
+                <<std::endl<<"Consultas (3). "
+                <<std::endl<<"Inserte la opción deseada: ";
         std::cin>>opcion1;
         std::cin.ignore(10000,'\n');
 
@@ -236,7 +238,8 @@ int main(){
                     <<std::endl<<"Crear, agregar, modificar y borrar en la lista simple de premios (8)."
                     <<std::endl<<"Registrar destino y puntos de viaje a un cliente (9)."
                     <<std::endl<<"Registrar premio obtenido a un cliente (10)."
-                    <<std::endl<<"Volver (11).";
+                    <<std::endl<<"Volver (11)."
+                    <<std::endl<<"Inserte la opción deseada: ";
                 
                 std::cin>>opcion2;
                 std::cin.ignore(10000,'\n');
@@ -257,11 +260,84 @@ int main(){
                         continue;
                     }
                     case 2:{ //Agregar y eliminar vértices (2).
+                        string nombre;
+                        int repeticiones;
                         while(true){
-                            string nombre;
                             clearScreen();
                             std::cout<<"Inserte el nombre del nuevo destino (El nombre no puede ser repetido): "<<std::endl;
                             getline(std::cin,nombre);
+                            if(comprobarNombreGrafo(nombre)){ //Comprobamos si el nombre del destino que insertó el usuario no está repetido
+                                while(true){
+                                    //Por aquí insertamos todas las fronteras que tiene nuestro destino (vértice)
+                                    clearScreen();
+                                    std::cout<<"Cuantas fronteras tiene nuestro destino (max 3): "<<std::endl;
+                                    std::cin>>repeticiones;
+                                    std::cin.ignore(10000,'\n');
+                                    if(repeticiones<=3 && repeticiones>0){
+                                        puntoDeEntrada*fronteras[3];
+                                        string nombreFrontera;
+                                        string tipoFrontera;
+                                        int cualTipo;
+                                        for(int r=0;r<3;r++){
+                                            clearScreen();
+                                            std::cout<<"Cual es el nombre del punto de entrada. "<<std::endl;
+                                            getline(std::cin,nombreFrontera);
+                                            while(true){ //Aquí establecemos el tipo de la frontera
+                                                std::cout<<"Inserte el tipo de entrada "
+                                                    <<std::endl<<"Terminal/frontera (1)."
+                                                    <<std::endl<<"Aeropuerto (2)."
+                                                    <<std::endl<<"Muelle (3)."<<std::endl;
+                                                std::cin>>cualTipo;
+                                                std::cin.ignore(10000,'\n');
+                                                switch (cualTipo){
+                                                case 1:{
+                                                    tipoFrontera="Terminal/frontera";
+                                                    break;
+                                                }
+                                                case 2:{
+                                                    tipoFrontera="Aeropuerto";
+                                                    break;
+                                                }
+                                                case 3:{
+                                                    tipoFrontera="Muelle";
+                                                    break;
+                                                }
+                                                default:{
+                                                    clearScreen();
+                                                    std::cout<<"Tipo inválido, por favor intente de nuevo."<<std::endl;
+                                                    sleep(2);
+                                                    clearScreen();
+                                                    continue;
+                                                }
+                                                }
+                                            }
+                                            fronteras[r]=new puntoDeEntrada(nombreFrontera,tipoFrontera);
+                                            repeticiones--;
+                                            if(repeticiones==0){
+                                                break;
+                                            }
+                                        }
+                                        agregarVertice(nombre,fronteras);
+                                        string cualquieraTecla; 
+                                        std::cout<<"Destino (vértice) añadido con éxito"<<std::endl;
+                                        std::cout<<"Inserte enter para continuar: "<<std::endl;
+                                        getline(std::cin,cualquieraTecla);
+                                        break;
+
+                                    }
+                                    else{
+                                        clearScreen();
+                                        std::cout<<"Cantidad de destinos inválida, volviendo..."<<std::endl;
+                                        sleep(2);
+                                    }
+                                }
+                                break;
+                            }
+                            else{
+                                clearScreen();
+                                std::cout<<"Nombre inválido, por favor intentelo de nuevo."<<std::endl;
+                                sleep(2);
+                            }
 
                         } 
                         continue; 
