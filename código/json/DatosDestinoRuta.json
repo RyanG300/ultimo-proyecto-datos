@@ -1,0 +1,36 @@
+{
+    "destinosVertice":[
+        {
+            "nombre": "Ciudad Quesada",
+            "puntosDeEntrada":[{
+                "nombre":"Terminal Ciudad Quesada",
+                "tipo":"Terminal"
+            },
+            {
+                "nombre":"141 calle",
+                "tipo":"carretera"   
+            }    
+        ]
+        },
+        {
+            "nombre": "Sucre",
+            "puntosDeEntrada":[{
+                "nombre":"parada bus",
+                "tipo":"Terminal"
+            },
+            {
+                "nombre":"141 calle",
+                "tipo":"carretera?"   
+            }    
+        ]
+        }
+    ],
+    "rutasArco":[
+        {
+            "origen": {"nombre":"Ciudad Quesada","punto de entrada":"Terminal Ciudad Quesada"},
+            "destino":{"nombre":"Sucre","punto de entrada":"parada bus"},
+            "transporte":"bus",
+            "horas":5
+        }
+    ]    
+}
