@@ -27,11 +27,12 @@ struct puntoDeEntrada{
     }
 };
 
-struct verticeOrigen{ //string nombreOrigen / puntoDeEntrada*puntosDeEntrada[3]
+struct verticeOrigen{ //string nombreOrigen / puntoDeEntrada*puntosDeEntrada[3] /Lista de vértices doble
     string nombreOrigen;
     puntoDeEntrada*puntosDeEntrada[3];
 
     struct verticeOrigen * sigV;//para enlazar todos los vertices en una lista
+    verticeOrigen*antV;
 
     struct arcoRuta *subListaArcos;//representa los arcos que salen de ese vertice
 
@@ -47,6 +48,7 @@ struct verticeOrigen{ //string nombreOrigen / puntoDeEntrada*puntosDeEntrada[3]
         }
         nombreOrigen = nom;
         sigV = NULL;
+        antV = NULL;
         subListaArcos = NULL;
         visitado = false;
     }
@@ -61,10 +63,11 @@ struct indicacionesRuta{
     }
 };
 
-struct arcoRuta{
+struct arcoRuta{ //Lista de arcos doble
     int horasDeRuta;
     string medioDeTransporte;
     struct arcoRuta *sigA;//siguiente arco.
+    arcoRuta*antA;
     indicacionesRuta*origen;
     indicacionesRuta*destino;
 
@@ -187,10 +190,75 @@ void crearGrafoJsonArcos(){ //Función auxiliar a "crearGrafoJsonVertices", enca
 
 // 2)
 //Agregar y eliminar vértices.
-void agregarVertice(string nombreOrigen,puntoDeEntrada*fronteras[3]){ //Agrega un vertice al grafo, sin cambiar el archivo json "DatosDestinoRuta.json"
+void agregarVertice(string nombreOrigen,puntoDeEntrada*fronteras[3]){ //Agrega un vértice al grafo, sin cambiar el archivo json "DatosDestinoRuta.json"
     verticeOrigen *nuevoVertice = new verticeOrigen(nombreOrigen,fronteras);
-    nuevoVertice->sigV = grafoRutas;
-    grafoRutas = nuevoVertice;
+    if(grafoRutas==NULL){
+        grafoRutas=nuevoVertice;
+    }
+    else{
+        verticeOrigen*temp=grafoRutas;
+        while(temp->sigV!=NULL){
+            temp=temp->sigV;
+        }
+        temp->sigV=nuevoVertice;
+        nuevoVertice->antV = temp;
+    }
+    
+}
+
+bool eliminarVertice(string nombreAEliminar){ //Elimina el vértice de grafo, junto a los arcos que apuntan a el
+    //Aquí borramos el vértice del grafo
+    verticeOrigen*temp1=grafoRutas;
+    bool eliminado=false;
+    while(temp1!=NULL){
+        if(temp1->nombreOrigen==nombreAEliminar){
+            if(temp1->sigV==NULL){
+                temp1->antV->sigV=NULL;
+                eliminado=true;
+                break;
+            }
+            else if(temp1->antV==NULL){
+                grafoRutas=temp1->sigV;
+                grafoRutas->antV=NULL;
+                eliminado=true;
+                break;
+            }
+            else{
+                temp1->antV->sigV=temp1->sigV;
+                temp1->sigV->antV=temp1->antV;
+                eliminado=true;
+                break;
+            }
+        }
+        temp1=temp1->sigV;
+    }
+    if(!eliminado){
+        return eliminado;
+    }
+
+    //Y aquí eliminamos los arcos que apuntan al vértice eliminado
+    verticeOrigen*temp2=grafoRutas;
+    while(temp2!=NULL){
+        arcoRuta*tempArco=temp2->subListaArcos;
+        while(tempArco!=NULL){
+            if(tempArco->destino->nombre==nombreAEliminar){
+                if(tempArco->sigA==NULL){
+                tempArco->antA->sigA=NULL;
+                }
+                else if(tempArco->antA==NULL){
+                    temp2->subListaArcos=temp2->subListaArcos->sigA;
+                    temp2->subListaArcos->antA=NULL;
+                }
+                else{
+                    tempArco->antA->sigA=tempArco->sigA;
+                    tempArco->sigA->antA=tempArco->antA;
+                }
+            }
+            tempArco=tempArco->sigA;
+        }
+        temp2=temp2->sigV;
+    }
+    return eliminado;
 }
 
 
@@ -278,11 +346,15 @@ int main(){
                                         string nombreFrontera;
                                         string tipoFrontera;
                                         int cualTipo;
+                                        bool salir=false;
                                         for(int r=0;r<3;r++){
                                             clearScreen();
-                                            std::cout<<"Cual es el nombre del punto de entrada. "<<std::endl;
+                                            std::cout<<"Cual es el nombre del punto de entrada (num: "<<r<<"). "<<std::endl;
                                             getline(std::cin,nombreFrontera);
                                             while(true){ //Aquí establecemos el tipo de la frontera
+                                                if(salir){
+                                                    break;
+                                                }
                                                 std::cout<<"Inserte el tipo de entrada "
                                                     <<std::endl<<"Terminal/frontera (1)."
                                                     <<std::endl<<"Aeropuerto (2)."
@@ -292,15 +364,18 @@ int main(){
                                                 switch (cualTipo){
                                                 case 1:{
                                                     tipoFrontera="Terminal/frontera";
-                                                    break;
+                                                    salir=true;
+                                                    continue;
                                                 }
                                                 case 2:{
                                                     tipoFrontera="Aeropuerto";
-                                                    break;
+                                                    salir=true;
+                                                    continue;
                                                 }
                                                 case 3:{
                                                     tipoFrontera="Muelle";
-                                                    break;
+                                                    salir=true;
+                                                    continue;
                                                 }
                                                 default:{
                                                     clearScreen();
@@ -320,7 +395,7 @@ int main(){
                                         agregarVertice(nombre,fronteras);
                                         string cualquieraTecla; 
                                         std::cout<<"Destino (vértice) añadido con éxito"<<std::endl;
-                                        std::cout<<"Inserte enter para continuar: "<<std::endl;
+                                        std::cout<<"Inserte cualquier tecla para continuar para continuar: "<<std::endl;
                                         getline(std::cin,cualquieraTecla);
                                         break;
 
