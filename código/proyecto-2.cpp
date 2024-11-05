@@ -186,7 +186,6 @@ bool buscarPuntoDeEntradaEspecifico(string nombreVertice,string nombrePuntoEntra
 
 // 1)
 //Crear el grafo en una representación multilista, tomando los datos (vértices y arcos) del archivo JSON.
-
 void crearGrafoJsonVertices(){ //Función para inicializar el grafo "grafoRutas" con la información del json "DatosDestinoRuta.json".
     ifstream jsonFilePrueba("json\\DatosDestinoRuta.json");
     nlohmann::json dataJson = nlohmann::json::parse(jsonFilePrueba);
@@ -331,7 +330,8 @@ void imprimirVertices(){ //Para mostrar el usuario los vertices disponibles para
     }
 }
 
-// 3) int hor, string med,string nomb1,string pun1,string nomb2,string pun2
+// 3) 
+// Agregar, eliminar y modificar arcos.
 bool insertarArcos(string origen,int horasRuta,string medioDeTransporte,string nombrePuntoEntrada,string nombrePuntoLlegada,string destino){
     verticeOrigen *vOrigen = buscarVertice(origen);
     verticeOrigen *vDestino = buscarVertice(destino);
@@ -353,6 +353,84 @@ bool insertarArcos(string origen,int horasRuta,string medioDeTransporte,string n
     return true;
 }
 
+bool eliminarArco(string origen,string destino,int indexRuta){ //Recibe el string de origen y destino, comprueba si existe el arco entre esos vértices y elimina el arco.
+    verticeOrigen*temp=grafoRutas;
+    int contador=0; //Index exacto de las rutas (arcos)
+    while(temp!=NULL){
+        if(temp->nombreOrigen==origen){
+            arcoRuta*tempArco=temp->subListaArcos;
+            while(tempArco!=NULL){
+                if(tempArco->origen->nombre==origen && tempArco->destino->nombre==destino && contador==indexRuta){
+                    if(tempArco->antA==NULL){
+                        temp->subListaArcos=temp2->subListaArcos->sigA;
+                        if(temp->subListaArcos!=NULL){
+                            temp->subListaArcos->antA=NULL;
+                        }
+                    }
+                    else if(tempArco->sigA==NULL){
+                        tempArco->antA->sigA=NULL;
+                    }
+                    else{
+                        tempArco->antA->sigA=tempArco->sigA;
+                        tempArco->sigA->antA=tempArco->antA;
+                    }
+                    return true;
+                }
+                contador++;
+                tempArco=tempArco->sigA;
+            }
+            return false;
+
+        }
+        temp=temp->sigV;
+    }
+    return false;
+}
+
+void imprimirRuta(string origen,string destino){ //Imprime todas las rutas que conecten los dos vértices recibidos
+    verticeOrigen*temp=grafoRutas;
+    int contador=0; //Index exacto de las rutas (arcos)
+    while(temp!=NULL){
+        if(temp->nombreOrigen==origen){
+            arcoRuta*tempArco=temp->subListaArcos;
+            while(tempArco!=NULL){
+                if(tempArco->origen->nombre==origen && tempArco->destino->nombre==destino){
+                    std::cout<<contador<<") origen: "<<tempArco->origen->nombre
+                    <<std::endl<<"   destino: "<<tempArco->destino->nombre
+                    <<std::endl<<"   transporte: "<<tempArco->medioDeTransporte;
+                }
+                tempArco=tempArco->sigA;
+                contador++;
+            }
+            std::cout<<"Inserte la ruta a eliminar (num): ";
+            return;
+        }
+        temp=temp->sigV;
+    }
+    std::cout<<"No hay rutas desde "<<origen<<" hacia "<<destino<<". Escriba 'salir' para volver: ";
+    
+}
+
+bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ //Modifica el tiempo de la ruta del arco escogido
+    verticeOrigen*temp=grafoRutas;
+    int contador=0;
+    while(temp!=NULL){
+        if(temp->nombreOrigen==origen){
+            arcoRuta*tempArco=temp->subListaArcos;
+            while(tempArco!=NULL){
+                if(tempArco->origen->nombre==origen && tempArco->destino->nombre==destino && contador==indexRuta){
+                    tempArco->horasDeRuta=nuevoTiempo;
+                    return true;
+                }
+                contador++;
+                tempArco=tempArco->sigA;
+            }
+            return false;
+        }
+        temp=temp->sigV;
+    }
+    return false;
+}
 
 //---------------------------------------------MAIN-------------------------------------------------
 //---------------------------------------------MAIN-------------------------------------------------
