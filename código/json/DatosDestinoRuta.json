@@ -4,11 +4,11 @@
             "nombre": "Ciudad Quesada",
             "puntosDeEntrada":[{
                 "nombre":"Terminal Ciudad Quesada",
-                "tipo":"Terminal"
+                "tipo":"Terminal/frontera"
             },
             {
                 "nombre":"141 calle",
-                "tipo":"carretera"   
+                "tipo":"Terminal/frontera"   
             }    
         ]
         },
@@ -16,11 +16,11 @@
             "nombre": "Sucre",
             "puntosDeEntrada":[{
                 "nombre":"parada bus",
-                "tipo":"Terminal"
+                "tipo":"Terminal/frontera"
             },
             {
                 "nombre":"141 calle",
-                "tipo":"carretera?"   
+                "tipo":"Terminal/frontera"   
             }    
         ]
         }

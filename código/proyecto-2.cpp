@@ -40,6 +40,7 @@ struct verticeOrigen{ //string nombreOrigen / puntoDeEntrada*puntosDeEntrada[3] 
     verticeOrigen(string nom, puntoDeEntrada*puntsEntrada[3]){
         for(int i=0;i<3;i++){
             if(puntsEntrada[i]==NULL){
+                puntosDeEntrada[i]=NULL;
                 continue;
             }
             else{
@@ -79,7 +80,10 @@ struct arcoRuta{ //Lista de arcos doble
         destino = new indicacionesRuta(nomb2,pun2);
     }
 };
+
+//Variables globales
 verticeOrigen *grafoRutas;// el apuntador inicial del grafo
+string tipoPuntoEntradaGlobal;
 
 //--------------------------------------FUNCIONES AUXILIARES----------------------------------------
 //--------------------------------------FUNCIONES AUXILIARES----------------------------------------
@@ -118,6 +122,54 @@ bool comprobarNombreGrafo(string nombre){
     return true;
 }
 
+// 4)
+void imprimirPuntosDeEntrada(string origen,bool bloquearDiferenteTipo=false){ //Busca el vertice por nombre y imprime sus puntos de entrada
+    verticeOrigen *tempV = grafoRutas;
+    int contador;
+    while(tempV != NULL){
+        if(tempV->nombreOrigen == origen){
+            for(int e=0;e<=2;e++){
+                if(tempV->puntosDeEntrada[e]!=NULL && !bloquearDiferenteTipo){
+                    std::cout<<contador<<") Nombre: "<<tempV->puntosDeEntrada[e]->nombre<<std::endl;
+                    std::cout<<"   Tipo: "<<tempV->puntosDeEntrada[e]->tipo<<std::endl;
+                    contador++;
+                }
+                else if(tempV->puntosDeEntrada[e]!=NULL && bloquearDiferenteTipo){
+                    if(tempV->puntosDeEntrada[e]->tipo==tipoPuntoEntradaGlobal){
+                        std::cout<<contador<<") Nombre: "<<tempV->puntosDeEntrada[e]->nombre<<std::endl;
+                        std::cout<<"   Tipo: "<<tempV->puntosDeEntrada[e]->tipo<<std::endl;
+                        contador++;
+                    }
+                }
+            }
+            return;
+ 
+        }
+        tempV = tempV->sigV;
+    }
+    return;
+}
+
+// 5)
+bool buscarPuntoDeEntradaEspecifico(string nombreVertice,string nombrePuntoEntrada){ //Busca el punto de entrada de un vértice por nombre especifico
+    verticeOrigen *tempV = grafoRutas;
+    while(tempV != NULL){
+        if(tempV->nombreOrigen == nombreVertice){
+            for(int e=0;e<3;e++){
+                if(tempV->puntosDeEntrada[e]->nombre==nombrePuntoEntrada){
+                    tipoPuntoEntradaGlobal=tempV->puntosDeEntrada[e]->tipo;
+                    return true;
+                }
+            }
+            return false;
+        }
+        tempV = tempV->sigV;
+    }
+    return false;
+}
+
+
+
 
 // 3) //Duerme
 /*void s_sleep(int tiempo){
@@ -143,7 +195,7 @@ void crearGrafoJsonVertices(){ //Función para inicializar el grafo "grafoRutas"
         if(grafoRutas==NULL){
             puntoDeEntrada*listaEntradas[3];
             for(int i=0;i<dataDos["puntosDeEntrada"].size();i++){
-                listaEntradas[i]=new puntoDeEntrada(dataDos["puntosDeEntrada"][i]["nombre"],dataDos["puntosDeEntrada"][i]["tipo"]);
+                listaEntradas[i]=new puntoDeEntrada(dataDos["puntosDeEntrada"][i]["nombre"].get<std::string>(),dataDos["puntosDeEntrada"][i]["tipo"].get<std::string>());
             }
             grafoRutas=new verticeOrigen(dataDos["nombre"],listaEntradas);
         }
@@ -154,9 +206,10 @@ void crearGrafoJsonVertices(){ //Función para inicializar el grafo "grafoRutas"
             }
             puntoDeEntrada*listaEntradas[3];
             for(int i=0;i<dataDos["puntosDeEntrada"].size();i++){
-                listaEntradas[i]=new puntoDeEntrada(dataDos["puntosDeEntrada"][i]["nombre"],dataDos["puntosDeEntrada"][i]["tipo"]);
+                listaEntradas[i]=new puntoDeEntrada(dataDos["puntosDeEntrada"][i]["nombre"].get<std::string>(),dataDos["puntosDeEntrada"][i]["tipo"].get<std::string>());
             }
-            temp->sigV=new verticeOrigen(dataDos["nombre"],listaEntradas);
+            temp->sigV=new verticeOrigen(dataDos["nombre"].get<std::string>(),listaEntradas);
+            temp->sigV->antV=temp;
         }
     }
 
@@ -184,6 +237,9 @@ void crearGrafoJsonArcos(){ //Función auxiliar a "crearGrafoJsonVertices", enca
         arcoRuta*arco=new arcoRuta(dataDos["horas"].get<unsigned int>(),dataDos["transporte"].get<std::string>(),dataDos["origen"]["nombre"].get<std::string>(),dataDos["origen"]["punto de entrada"].get<std::string>(),dataDos["destino"]["nombre"].get<std::string>(),dataDos["destino"]["punto de entrada"].get<std::string>());
 
         arco->sigA=vOrigen->subListaArcos;
+        if(vOrigen->subListaArcos!=NULL){
+            arco->sigA->antA=arco;
+        }
         vOrigen->subListaArcos=arco;
     }
 }
@@ -212,14 +268,16 @@ bool eliminarVertice(string nombreAEliminar){ //Elimina el vértice de grafo, ju
     bool eliminado=false;
     while(temp1!=NULL){
         if(temp1->nombreOrigen==nombreAEliminar){
-            if(temp1->sigV==NULL){
-                temp1->antV->sigV=NULL;
+            if(temp1->antV==NULL){
+                grafoRutas=temp1->sigV;
+                if(grafoRutas!=NULL){
+                    grafoRutas->antV=NULL;
+                }
                 eliminado=true;
                 break;
             }
-            else if(temp1->antV==NULL){
-                grafoRutas=temp1->sigV;
-                grafoRutas->antV=NULL;
+            else if(temp1->sigV==NULL){
+                temp1->antV->sigV=NULL;
                 eliminado=true;
                 break;
             }
@@ -242,12 +300,14 @@ bool eliminarVertice(string nombreAEliminar){ //Elimina el vértice de grafo, ju
         arcoRuta*tempArco=temp2->subListaArcos;
         while(tempArco!=NULL){
             if(tempArco->destino->nombre==nombreAEliminar){
-                if(tempArco->sigA==NULL){
-                tempArco->antA->sigA=NULL;
-                }
-                else if(tempArco->antA==NULL){
+                if(tempArco->antA==NULL){
                     temp2->subListaArcos=temp2->subListaArcos->sigA;
-                    temp2->subListaArcos->antA=NULL;
+                    if(temp2->subListaArcos!=NULL){
+                        temp2->subListaArcos->antA=NULL;
+                    }
+                }
+                else if(tempArco->sigA==NULL){
+                    tempArco->antA->sigA=NULL;
                 }
                 else{
                     tempArco->antA->sigA=tempArco->sigA;
@@ -261,6 +321,37 @@ bool eliminarVertice(string nombreAEliminar){ //Elimina el vértice de grafo, ju
     return eliminado;
 }
 
+void imprimirVertices(){ //Para mostrar el usuario los vertices disponibles para eliminar
+    verticeOrigen*temp=grafoRutas;
+    int contador;
+    while(temp!=NULL){
+        std::cout<<contador<<") "<<temp->nombreOrigen<<std::endl;
+        temp=temp->sigV;
+        contador++;
+    }
+}
+
+// 3) int hor, string med,string nomb1,string pun1,string nomb2,string pun2
+bool insertarArcos(string origen,int horasRuta,string medioDeTransporte,string nombrePuntoEntrada,string nombrePuntoLlegada,string destino){
+    verticeOrigen *vOrigen = buscarVertice(origen);
+    verticeOrigen *vDestino = buscarVertice(destino);
+    if(vOrigen == NULL){
+        //cout<<"\nNo se encuentra el origen.";
+        return false;
+    }
+    if(vDestino == NULL){
+        //cout<<"\nNo se encuentra el destino.";
+        return false;
+    }
+
+    arcoRuta*arco=new arcoRuta(horasRuta,medioDeTransporte,origen,nombrePuntoEntrada,destino,nombrePuntoLlegada);
+    arco->sigA=vOrigen->subListaArcos;
+    if(vOrigen->subListaArcos!=NULL){
+        arco->sigA->antA=arco;
+    }
+    vOrigen->subListaArcos=arco;
+    return true;
+}
 
 
 //---------------------------------------------MAIN-------------------------------------------------
@@ -330,94 +421,275 @@ int main(){
                     case 2:{ //Agregar y eliminar vértices (2).
                         string nombre;
                         int repeticiones;
-                        while(true){
-                            clearScreen();
-                            std::cout<<"Inserte el nombre del nuevo destino (El nombre no puede ser repetido): "<<std::endl;
-                            getline(std::cin,nombre);
-                            if(comprobarNombreGrafo(nombre)){ //Comprobamos si el nombre del destino que insertó el usuario no está repetido
-                                while(true){
-                                    //Por aquí insertamos todas las fronteras que tiene nuestro destino (vértice)
-                                    clearScreen();
-                                    std::cout<<"Cuantas fronteras tiene nuestro destino (max 3): "<<std::endl;
-                                    std::cin>>repeticiones;
-                                    std::cin.ignore(10000,'\n');
-                                    if(repeticiones<=3 && repeticiones>0){
-                                        puntoDeEntrada*fronteras[3];
-                                        string nombreFrontera;
-                                        string tipoFrontera;
-                                        int cualTipo;
-                                        bool salir=false;
-                                        for(int r=0;r<3;r++){
-                                            clearScreen();
-                                            std::cout<<"Cual es el nombre del punto de entrada (num: "<<r<<"). "<<std::endl;
-                                            getline(std::cin,nombreFrontera);
-                                            while(true){ //Aquí establecemos el tipo de la frontera
-                                                if(salir){
+                        int subOpcion;
+                        clearScreen();
+                        std::cout<<"Inserte la opción deseada: "
+                            <<std::endl<<"Agregar vértice (1)."
+                            <<std::endl<<"Eliminar vértice (2)."<<std::endl;
+                        
+                        std::cin>>subOpcion;
+                        std::cin.ignore(10000,'\n');
+                        if(subOpcion==1){ //Agregar vértice (1)
+                            while(true){
+                                clearScreen();
+                                std::cout<<"Inserte el nombre del nuevo destino (El nombre no puede ser repetido): "<<std::endl;
+                                getline(std::cin,nombre);
+                                if(comprobarNombreGrafo(nombre)){ //Comprobamos si el nombre del destino que insertó el usuario no está repetido
+                                    while(true){
+                                        //Por aquí insertamos todas las fronteras que tiene nuestro destino (vértice)
+                                        clearScreen();
+                                        std::cout<<"Cuantas fronteras tiene nuestro destino (max 3): "<<std::endl;
+                                        std::cin>>repeticiones;
+                                        std::cin.ignore(10000,'\n');
+                                        if(repeticiones<=3 && repeticiones>0){
+                                            puntoDeEntrada*fronteras[3];
+                                            string nombreFrontera;
+                                            string tipoFrontera;
+                                            int cualTipo;
+                                            bool salir=false;
+                                            for(int r=0;r<3;r++){
+                                                clearScreen();
+                                                std::cout<<"Cual es el nombre del punto de entrada (num: "<<r<<"). "<<std::endl;
+                                                getline(std::cin,nombreFrontera);
+                                                while(true){ //Aquí establecemos el tipo de la frontera
+                                                    if(salir){
+                                                        break;
+                                                    }
+                                                    std::cout<<"Inserte el tipo de entrada "
+                                                        <<std::endl<<"Terminal/frontera (1)."
+                                                        <<std::endl<<"Aeropuerto (2)."
+                                                        <<std::endl<<"Muelle (3)."<<std::endl;
+                                                    std::cin>>cualTipo;
+                                                    std::cin.ignore(10000,'\n');
+                                                    switch (cualTipo){
+                                                    case 1:{
+                                                        tipoFrontera="Terminal/frontera";
+                                                        salir=true;
+                                                        continue;
+                                                    }
+                                                    case 2:{
+                                                        tipoFrontera="Aeropuerto";
+                                                        salir=true;
+                                                        continue;
+                                                    }
+                                                    case 3:{
+                                                        tipoFrontera="Muelle";
+                                                        salir=true;
+                                                        continue;
+                                                    }
+                                                    default:{
+                                                        clearScreen();
+                                                        std::cout<<"Tipo inválido, por favor intente de nuevo."<<std::endl;
+                                                        sleep(2);
+                                                        clearScreen();
+                                                        continue;
+                                                    }
+                                                    }
+                                                }
+                                                fronteras[r]=new puntoDeEntrada(nombreFrontera,tipoFrontera);
+                                                repeticiones--;
+                                                if(repeticiones==0){
+                                                    if(r==0){
+                                                        fronteras[1]=NULL;
+                                                        fronteras[2]=NULL;
+                                                    }
+                                                    else if(r==1){
+                                                        fronteras[2]=NULL;
+                                                    }
                                                     break;
                                                 }
-                                                std::cout<<"Inserte el tipo de entrada "
-                                                    <<std::endl<<"Terminal/frontera (1)."
-                                                    <<std::endl<<"Aeropuerto (2)."
-                                                    <<std::endl<<"Muelle (3)."<<std::endl;
-                                                std::cin>>cualTipo;
-                                                std::cin.ignore(10000,'\n');
-                                                switch (cualTipo){
-                                                case 1:{
-                                                    tipoFrontera="Terminal/frontera";
-                                                    salir=true;
-                                                    continue;
-                                                }
-                                                case 2:{
-                                                    tipoFrontera="Aeropuerto";
-                                                    salir=true;
-                                                    continue;
-                                                }
-                                                case 3:{
-                                                    tipoFrontera="Muelle";
-                                                    salir=true;
-                                                    continue;
-                                                }
-                                                default:{
-                                                    clearScreen();
-                                                    std::cout<<"Tipo inválido, por favor intente de nuevo."<<std::endl;
-                                                    sleep(2);
-                                                    clearScreen();
-                                                    continue;
-                                                }
-                                                }
                                             }
-                                            fronteras[r]=new puntoDeEntrada(nombreFrontera,tipoFrontera);
-                                            repeticiones--;
-                                            if(repeticiones==0){
-                                                break;
-                                            }
-                                        }
-                                        agregarVertice(nombre,fronteras);
-                                        string cualquieraTecla; 
-                                        std::cout<<"Destino (vértice) añadido con éxito"<<std::endl;
-                                        std::cout<<"Inserte cualquier tecla para continuar para continuar: "<<std::endl;
-                                        getline(std::cin,cualquieraTecla);
-                                        break;
+                                            agregarVertice(nombre,fronteras);
+                                            string cualquieraTecla; 
+                                            std::cout<<"Destino (vértice) añadido con éxito"<<std::endl;
+                                            std::cout<<"Inserte cualquier tecla para continuar para continuar: "<<std::endl;
+                                            getline(std::cin,cualquieraTecla);
+                                            break;
 
+                                        }
+                                        else{
+                                            clearScreen();
+                                            std::cout<<"Cantidad de destinos inválida, volviendo..."<<std::endl;
+                                            sleep(2);
+                                        }
+                                    }
+                                    break;
+                                }
+                                else{
+                                    clearScreen();
+                                    std::cout<<"Nombre inválido, por favor intentelo de nuevo."<<std::endl;
+                                    sleep(2);
+                                }
+
+                        } 
+                            continue;
+                        }
+                        if(subOpcion==2){ //Eliminar vértice (2)
+                            while(true){
+                                clearScreen();
+                                if(grafoRutas!=NULL){
+                                    std::cout<<"Destinos disponibles: "<<std::endl;
+                                    imprimirVertices();
+                                    std::cout<<"Inserte el nombre del vértice a eliminar, o por el contrario escriba salir: ";
+                                    getline(std::cin,nombre);
+                                    if(eliminarVertice(nombre)){
+                                        clearScreen();
+                                        std::cout<<"Eliminado con éxito, volviendo al menú..."<<std::endl;
+                                        sleep(2);
+                                        break;
+                                    }
+                                    else if(nombre=="salir"){
+                                        break;
                                     }
                                     else{
                                         clearScreen();
-                                        std::cout<<"Cantidad de destinos inválida, volviendo..."<<std::endl;
+                                        std::cout<<"El nombre del vértice a eliminar no existe..."<<std::endl;
                                         sleep(2);
                                     }
-                                }
-                                break;
-                            }
-                            else{
-                                clearScreen();
-                                std::cout<<"Nombre inválido, por favor intentelo de nuevo."<<std::endl;
-                                sleep(2);
-                            }
 
-                        } 
-                        continue; 
+                                }   
+                                else{
+                                    std::cout<<"Sin vértices en el grafo, volviendo al menú..."<<std::endl;
+                                    sleep(2);
+                                    break;
+                                }                                    
+                            }
+                            continue;
+                        }
+                        else{
+                            clearScreen();
+                            std::cout<<"Opción inválida, volviendo al menú..."<<std::endl;
+                            sleep(2);
+                            continue;
+                        }
+                         
                     }
                     case 3:{ //Agregar, eliminar y modificar arcos (3).
+                        clearScreen();
+                        int subOpcion;
+                        std::cout<<"Inserte la opción deseada: "
+                            <<std::endl<<"Agregar arco (1)."
+                            <<std::endl<<"Eliminar arco (2)."
+                            <<std::endl<<"Modificar arco (3)."<<std::endl;
+                            std::cin>>subOpcion;
+                            std::cin.ignore(10000,'\n');
+                            switch(subOpcion){
+                                case 1:{ // Agregar arco (1)
+                                    string origen;
+                                    string destino;
+                                    string puntoDeOrigen;
+                                    string puntoDeDestino;
+                                    string medioDeTransporte;
+                                    int horasRuta;
+                                    while(true){
+                                        clearScreen();
+                                        std::cout<<"Vértices disponibles: "<<std::endl;
+                                        imprimirVertices();
+                                        std::cout<<"Inserte el vértice el cual será el origen de nuestro arco: ";
+                                        getline(std::cin,origen);
+                                        if(!comprobarNombreGrafo(origen)){
+                                            while(true){
+                                                clearScreen();
+                                                std::cout<<"Vértices disponibles: "<<std::endl;
+                                                imprimirVertices();
+                                                std::cout<<"Inserte el vértice el cual será el destino de nuestro arco: ";
+                                                getline(std::cin,destino);
+                                                if(!comprobarNombreGrafo(destino) && origen!=destino){
+                                                    while(true){
+                                                        clearScreen();
+                                                        std::cout<<"Puntos de partida desde el origen: "<<std::endl;
+                                                        imprimirPuntosDeEntrada(origen);
+                                                        std::cout<<"Escriba el nombre del punto de origen deseado: ";
+                                                        getline(std::cin,puntoDeOrigen);
+                                                        if(buscarPuntoDeEntradaEspecifico(origen,puntoDeOrigen)){
+                                                            while(true){
+                                                                clearScreen();
+                                                                if(tipoPuntoEntradaGlobal=="Terminal/frontera"){
+                                                                    medioDeTransporte="auto";
+                                                                }  
+                                                                else if(tipoPuntoEntradaGlobal=="Aeropuerto"){
+                                                                    medioDeTransporte="avión";
+                                                                }
+                                                                else if(tipoPuntoEntradaGlobal=="Muelle"){
+                                                                    medioDeTransporte="barco";
+                                                                }
+                                                                std::cout<<"Puntos de partida disponibles desde el destino: "<<std::endl;\
+                                                                imprimirPuntosDeEntrada(destino,true);
+                                                                std::cout<<"Escriba el nombre del punto de destino deseado."
+                                                                <<std::endl<<"(Si no hay puntos de destino es probable que el tipo de partida del origen no calce con ninguna de los puntos del destino)"
+                                                                <<std::endl<<"(En ese caso puede escribir 'salir' para volver al menú): ";
+                                                                getline(std::cin,puntoDeDestino);
+                                                                if(puntoDeDestino=="salir"){
+                                                                    break;
+                                                                }
+                                                                else if(buscarPuntoDeEntradaEspecifico(destino,puntoDeDestino)){
+                                                                    clearScreen();
+                                                                    std::cout<<"Cuanto horas dura la ruta?: ";
+                                                                    std::cin>>horasRuta;
+                                                                    std::cin.ignore(10000,'\n');
+                                                                    if(insertarArcos(origen,horasRuta,medioDeTransporte,puntoDeOrigen,puntoDeDestino,destino)){
+                                                                        clearScreen();
+                                                                        std::cout<<"Arco insertado con éxito, volviendo al menú..."<<std::endl;
+                                                                        sleep(2);
+                                                                        break;
+                                                                    }
+                                                                    else{
+                                                                        clearScreen();
+                                                                        std::cout<<"IMPOSBILE"<<std::endl;
+                                                                        sleep(2);
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                else{
+                                                                    clearScreen();
+                                                                    std::cout<<"Comando inválido, volviendo al menú..."<<std::endl;
+                                                                    sleep(2);
+                                                                }
+                                                            }
+                                                            break;
+                                                        }
+                                                        else{
+                                                            clearScreen();
+                                                            std::cout<<"El nombre del punto origen no existe..."<<std::endl;
+                                                            sleep(2);
+
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                                else{
+                                                    clearScreen();
+                                                    std::cout<<"El vértice que se insertó no existe o es repetido, volviendo..."<<std::endl;
+                                                    sleep(2);
+                                                }
+                                            }
+                                            break;
+                                            
+                                        }
+                                        else{
+                                            clearScreen();
+                                            std::cout<<"El vértice que se insertó no existe, volviendo..."<<std::endl;
+                                            sleep(2);
+                                        }
+
+                                    }
+                                    continue;
+                                }
+                                case 2:{ // Eliminar arco (2)
+                                    continue;
+                                }
+                                case 3:{ // Modificar arco (3)
+                                    continue; 
+                                }
+                                default:{
+                                    std::cout<<"Opción inválida, volviendo al menú..."<<std::endl;
+                                    sleep(2);
+                                    break;
+                                }
+
+                            }
+                        
+                        
                         continue;
                     }
                     case 4:{ //Guardar el grafo actualizado en un archivo JSON (4).
