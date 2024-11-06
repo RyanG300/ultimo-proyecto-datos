@@ -111,7 +111,7 @@ void clearScreen(){ //Borrar pantalla, determina si el programa se esta corriend
 }
 
 // 3)
-bool comprobarNombreGrafo(string nombre){
+bool comprobarNombreGrafo(string nombre){ //Comprueba la repetición de un vértice en el grafo
     verticeOrigen*temp=grafoRutas;
     while(temp!=NULL){
         if(temp->nombreOrigen==nombre){
@@ -356,21 +356,28 @@ bool insertarArcos(string origen,int horasRuta,string medioDeTransporte,string n
 bool eliminarArco(string origen,string destino,int indexRuta){ //Recibe el string de origen y destino, comprueba si existe el arco entre esos vértices y elimina el arco.
     verticeOrigen*temp=grafoRutas;
     int contador=0; //Index exacto de las rutas (arcos)
+    std::cout<<"Prueba 1"<<std::endl;
     while(temp!=NULL){
         if(temp->nombreOrigen==origen){
             arcoRuta*tempArco=temp->subListaArcos;
             while(tempArco!=NULL){
+                std::cout<<"Prueba 2"<<std::endl;
                 if(tempArco->origen->nombre==origen && tempArco->destino->nombre==destino && contador==indexRuta){
+                    std::cout<<tempArco->antA<<std::endl;
                     if(tempArco->antA==NULL){
-                        temp->subListaArcos=temp2->subListaArcos->sigA;
+                        std::cout<<"Prueba 5"<<std::endl;
+                        temp->subListaArcos=temp->subListaArcos->sigA;
                         if(temp->subListaArcos!=NULL){
                             temp->subListaArcos->antA=NULL;
                         }
+                        std::cout<<"Prueba 4"<<std::endl;
                     }
                     else if(tempArco->sigA==NULL){
+                        std::cout<<"Prueba 6"<<std::endl;
                         tempArco->antA->sigA=NULL;
                     }
                     else{
+                        std::cout<<"Prueba 7"<<std::endl;
                         tempArco->antA->sigA=tempArco->sigA;
                         tempArco->sigA->antA=tempArco->antA;
                     }
@@ -395,9 +402,9 @@ void imprimirRuta(string origen,string destino){ //Imprime todas las rutas que c
             arcoRuta*tempArco=temp->subListaArcos;
             while(tempArco!=NULL){
                 if(tempArco->origen->nombre==origen && tempArco->destino->nombre==destino){
-                    std::cout<<contador<<") origen: "<<tempArco->origen->nombre
+                    std::cout<<std::endl<<contador<<") origen: "<<tempArco->origen->nombre
                     <<std::endl<<"   destino: "<<tempArco->destino->nombre
-                    <<std::endl<<"   transporte: "<<tempArco->medioDeTransporte;
+                    <<std::endl<<"   transporte: "<<tempArco->medioDeTransporte<<std::endl;
                 }
                 tempArco=tempArco->sigA;
                 contador++;
@@ -432,6 +439,48 @@ bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ 
     return false;
 }
 
+// 4)
+//Guardar el grafo actualizado en un archivo JSON.
+
+void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json 
+    nlohmann::json nuevoJson;
+    verticeOrigen*temp=grafoRutas;
+    int contador=0;
+    while(temp!=NULL){
+        nuevoJson["destinosVertice"][contador]["nombre"]=temp->nombreOrigen;
+        puntoDeEntrada*tempEntrada[3];
+        for(int p=0;p<3;p++){
+            tempEntrada[p]=temp->puntosDeEntrada[p];
+        }
+        for(int r=0;r<3;r++){
+            nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["nombre"]=tempEntrada[r]->nombre;
+            nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["tipo"]=tempEntrada[r]->tipo;
+        }
+        arcoRuta*tempRuta=temp->subListaArcos;
+        while(tempRuta!=NULL){
+            //Origen
+            nuevoJson["rutasArco"]["origen"]["nombre"]=tempRuta->origen->nombre;
+            nuevoJson["rutasArco"]["origen"]["punto de entrada"]=tempRuta->origen->puntoDeEntrada;
+            //destino
+            nuevoJson["rutasArco"]["destino"]["nombre"]=tempRuta->destino->nombre;
+            nuevoJson["rutasArco"]["destino"]["punto de entrada"]=tempRuta->destino->puntoDeEntrada;
+
+            //Transporte
+            nuevoJson["rutasArco"]["transporte"]=tempRuta->medioDeTransporte;
+
+            //Horas
+            nuevoJson["rutasArco"]["horas"]=tempRuta->horasDeRuta;
+            tempRuta=tempRuta->sigA;
+        }
+        contador++;
+        temp=temp->sigV;
+    }
+
+    std::ofstream jsonOut("json\\prueba.json");
+    jsonOut << std::setw(4)<<nuevoJson;
+}
+
+
 //---------------------------------------------MAIN-------------------------------------------------
 //---------------------------------------------MAIN-------------------------------------------------
 //---------------------------------------------MAIN-------------------------------------------------
@@ -443,6 +492,7 @@ int main(){
     bool carga=false;
     while(true){
         clearScreen();
+        guardarGrafoRutaJson();
         std::cout<<"     ==============================================      "<<std::endl;
         std::cout<<"                     VIAJES Y TAL S.A                    "<<std::endl;
         std::cout<<"     ==============================================      "<<std::endl<<std::endl;
@@ -648,7 +698,8 @@ int main(){
                         std::cout<<"Inserte la opción deseada: "
                             <<std::endl<<"Agregar arco (1)."
                             <<std::endl<<"Eliminar arco (2)."
-                            <<std::endl<<"Modificar arco (3)."<<std::endl;
+                            <<std::endl<<"Modificar arco (3)."
+                            <<std::endl<<"Salir (4). "<<std::endl;
                             std::cin>>subOpcion;
                             std::cin.ignore(10000,'\n');
                             switch(subOpcion){
@@ -753,11 +804,123 @@ int main(){
                                     }
                                     continue;
                                 }
-                                case 2:{ // Eliminar arco (2)
+                                case 2:{ // Eliminar arco (2) //FALTA ARREGLAR BUGS
+                                    string origen;
+                                    string destino;
+                                    int indexRuta;
+                                    while(true){
+                                        clearScreen();
+                                        std::cout<<"Vertices totales: "<<std::endl;
+                                        imprimirVertices();
+                                        std::cout<<"Seleccione el vertice origen: ";
+                                        getline(std::cin,origen);
+                                        if(!comprobarNombreGrafo(origen)){
+                                            while(true){
+                                                clearScreen();
+                                                std::cout<<"Vertices totales: "<<std::endl;
+                                                imprimirVertices();
+                                                std::cout<<"Seleccione el vertice destino: ";
+                                                getline(std::cin,destino);
+                                                if(!comprobarNombreGrafo(destino) && origen!=destino){
+                                                    while(true){
+                                                        clearScreen();
+                                                        std::cout<<"Rutas disponibles entre "<<origen<<" y "<<destino<<": "<<std::endl;
+                                                        imprimirRuta(origen,destino);
+                                                        try{
+                                                            std::cin>>indexRuta;
+                                                            std::cin.ignore(10000,'\n');
+                                                            clearScreen();
+                                                            std::cout<<((eliminarArco(origen,destino,indexRuta)) ? "Eliminado con éxito, volviendo al menú...":"Error al borrar, la ruta dada no existe, volviendo al menú...")<<std::endl;
+                                                            sleep(2);
+                                                            break;
+                                                        }
+                                                        catch(exception a){
+                                                            clearScreen();
+                                                            std::cout<<"Saliendo..."<<std::endl;
+                                                            sleep(2);
+                                                            break;
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                                else{
+                                                    clearScreen();
+                                                    std::cout<<"El vértice otorgado no existe o es igual al origen, volviendo..."<<std::endl;
+                                                    sleep(2);
+                                                }
+                                            }
+                                            break;
+                                        }
+                                        else{
+                                            clearScreen();
+                                            std::cout<<"El vértice otorgado no existe, volviendo..."<<std::endl;
+                                            sleep(2);
+                                        }
+                                    }    
                                     continue;
                                 }
                                 case 3:{ // Modificar arco (3)
+                                    string origen;
+                                    string destino;
+                                    int indexRuta;
+                                    int nuevoTiempo;
+                                    while(true){
+                                        clearScreen();
+                                        std::cout<<"Vertices totales: "<<std::endl;
+                                        imprimirVertices();
+                                        std::cout<<"Seleccione el vertice origen: ";
+                                        getline(std::cin,origen);
+                                        if(!comprobarNombreGrafo(origen)){
+                                            while(true){
+                                                clearScreen();
+                                                std::cout<<"Vertices totales: "<<std::endl;
+                                                imprimirVertices();
+                                                std::cout<<"Seleccione el vertice destino: ";
+                                                getline(std::cin,destino);
+                                                if(!comprobarNombreGrafo(destino) && origen!=destino){
+                                                    clearScreen();
+                                                    std::cout<<"Inserte el nuevo tiempo deseado para la ruta: ";
+                                                    std::cin>>nuevoTiempo;
+                                                    std::cin.ignore(10000,'\n');
+                                                    clearScreen();
+                                                    std::cout<<"Rutas disponibles entre "<<origen<<" y "<<destino<<": "<<std::endl;
+                                                    imprimirRuta(origen,destino);
+                                                    try{
+                                                        std::cin>>indexRuta;
+                                                        std::cin.ignore(10000,'\n');
+                                                        clearScreen();
+                                                        std::cout<<((modificarArco(origen,destino,nuevoTiempo,indexRuta)) ? "Ruta modificada con éxito, volviendo al menú.":"Error al modificar, volviendo al menú.")<<std::endl;
+                                                        sleep(2);
+                                                        break;
+
+                                                    }
+                                                    catch(exception a){
+                                                        clearScreen();
+                                                        std::cout<<"Saliendo..."<<std::endl;
+                                                        sleep(2);
+                                                        break;
+                                                    }
+                                                }
+                                                else{
+                                                    clearScreen();
+                                                    std::cout<<"El vértice otorgado no existe o es igual al origen, volviendo..."<<std::endl;
+                                                    sleep(2);
+                                                }
+
+                                            }
+                                            break;
+                                        }
+                                        else{
+                                            clearScreen();
+                                            std::cout<<"El vértice otorgado no existe, volviendo..."<<std::endl;
+                                            sleep(2);
+                                        }
+                                    }
+                                    
                                     continue; 
+                                }
+                                case 4:{ //Salir (4)
+                                    continue;
                                 }
                                 default:{
                                     std::cout<<"Opción inválida, volviendo al menú..."<<std::endl;
@@ -771,6 +934,26 @@ int main(){
                         continue;
                     }
                     case 4:{ //Guardar el grafo actualizado en un archivo JSON (4).
+                        clearScreen();
+                        string comando;
+                        if(grafoRutas==NULL){
+                            std::cout<<"El grafo de viajes esta vacio, volviendo al menú..."<<std::endl;
+                            sleep(2);
+                            continue;
+                        }
+                        std::cout<<"Estas seguro? esto sobrescribira el archivo prueba.json (y/n)."<<std::endl;
+                        getline(std::cin,comando);
+                        if(comando=="y" || comando=="yes" || comando=="si"){
+                            clearScreen();
+                            guardarGrafoRutaJson();
+                            std::cout<<"Sobrescrito con exito, volviendo al menú..."<<std::endl;
+                            sleep(2);
+                        }
+                        else{
+                            clearScreen();
+                            std::cout<<"Volviendo al menú..."<<std::endl;
+                            sleep(2);
+                        }
                         continue;
                     }
                     case 5:{ //Cargar datos de los usuarios desde el archivo clientesDatos.json (5).
