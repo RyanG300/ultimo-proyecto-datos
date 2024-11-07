@@ -503,6 +503,35 @@ void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json
 }
 
 
+//-------------------------------------------REPORTES-----------------------------------------------
+//-------------------------------------------REPORTES-----------------------------------------------
+//-------------------------------------------REPORTES-----------------------------------------------
+
+// 1)
+//Imprimir el grafo en amplitud, mostrar Origen Destino, medio y horas.
+
+void imprimirGrafoAmplitud(){
+    verticeOrigen*tempV =grafoRutas;
+    int contador;
+    while(tempV != NULL){//RECORRE LA LISTA DE VERTICES
+        std::cout<<std::endl<<contador<<") Vertice:  "<<tempV->nombreOrigen<<std::endl;
+        arcoRuta *tempA = tempV->subListaArcos;
+
+        std::cout<<"Rutas: "<<std::endl;
+        while(tempA != NULL){//RECORRE LOS ARCOS DE LA LISTA DE ARCOS DEL VERTICE
+            std::cout<<tempA->origen->nombre<<" -> "<<tempA->destino->nombre<<" || Duración: "<<tempA->horasDeRuta<<" || Medio transporte: "<<tempA->medioDeTransporte<<std::endl;
+            tempA = tempA->sigA;
+        }
+        tempV = tempV->sigV;
+        contador++;
+    }
+}
+
+
+
+
+
+
 //---------------------------------------------MAIN-------------------------------------------------
 //---------------------------------------------MAIN-------------------------------------------------
 //---------------------------------------------MAIN-------------------------------------------------
@@ -514,7 +543,6 @@ int main(){
     bool carga=false;
     while(true){
         clearScreen();
-        guardarGrafoRutaJson();
         std::cout<<"     ==============================================      "<<std::endl;
         std::cout<<"                     VIAJES Y TAL S.A                    "<<std::endl;
         std::cout<<"     ==============================================      "<<std::endl<<std::endl;
@@ -530,7 +558,12 @@ int main(){
         switch (opcion1){
         case 1:{ //Gestión de datos (1)
             int opcion2;
+            bool salirDatos=false;
             while(true){
+                if(salirDatos){
+                    salirDatos=false;
+                    break;
+                }
                 clearScreen();
                 std::cout<<"     ==============================================      "<<std::endl;
                 std::cout<<"                    Gestión de datos                     "<<std::endl;
@@ -997,7 +1030,7 @@ int main(){
                         continue;
                     }
                     case 11:{ //Volver (11).
-                        break;                
+                        salirDatos=true;                
                     }
                 }
             }
@@ -1005,6 +1038,81 @@ int main(){
 
         }
         case 2:{ //Reportes (2)
+            int opcion3;
+            bool salirReportes=false;
+            while(true){
+                if(salirReportes){
+                    salirReportes=false;
+                    break;
+                }
+                clearScreen();
+                std::cout<< "    ==============================================    "
+               <<std::endl<<"                 REPORTES DEL GRAFO                   "
+               <<std::endl<<"    ==============================================    "<<std::endl<<std::endl;
+
+                std::cout<<"Esta es la sección de reportes, por favor intruduzca la opción deseada: "<<std::endl
+                    <<std::endl<<"Imprimir el grafo en amplitud (1)."
+                    <<std::endl<<"Imprimir el grafo en profundidad (2)."
+                    <<std::endl<<"Imprimir la lista de premios (3)."
+                    <<std::endl<<"Imprimir la lista de clientes (4)."
+                    <<std::endl<<"Imprimir todos los clientes con viaje reservado (5)."
+                    <<std::endl<<"Imprimir todos los clientes con premios (6)."
+                    <<std::endl<<"Imprimir destinos del grafo sin visita (7)."
+                    <<std::endl<<"Volver al menú principal (8)."<<std::endl
+                    <<std::endl<<"Inserte la opción deseada: ";
+                std::cin>>opcion3;
+                std::cin.ignore(10000,'\n');
+                switch(opcion3){
+                    case 1:{ //Imprimir el grafo en amplitud (1).
+                        string salir;
+                        clearScreen();
+                        if(grafoRutas==NULL){
+                            std::cout<<"Lo sentimos, el grafo está vacio, volviendo..."<<std::endl;
+                            sleep(2);
+                            continue;
+                        }
+                        else{
+                            imprimirGrafoAmplitud();
+                            std::cout<<std::endl<<"Digite cualquier tecla para salir: ";
+                            getline(std::cin,salir);
+                            continue;
+                        }
+
+                    }
+                    case 2:{ //Imprimir el grafo en profundidad (2)
+                        continue;
+                    }
+                    case 3:{ //Imprimir la lista de premios (3)
+                        continue;
+                    }
+                    case 4:{ //Imprimir la lista de clientes (4)
+                        continue;
+                    }
+                    case 5:{ //Imprimir todos los clientes con viaje reservado (5)
+                        continue;
+                    }
+                    case 6:{ //Imprimir todos los clientes con premios (6)
+                        continue;
+                    }
+                    case 7:{ //Imprimir destinos del grafo sin visita (7)
+                        continue;
+                    }
+                    case 8:{ //Volver al menú principal (8)
+                        clearScreen();
+                        salirReportes=true;
+                        continue;
+                    }
+                    default:{
+                        clearScreen();
+                        std::cout<<"Opción inválida, volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        continue;
+                    }
+                }
+
+            }
+            
+            
             continue;
         }
         case 3:{ //Consultas (3)
