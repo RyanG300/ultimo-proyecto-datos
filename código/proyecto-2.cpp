@@ -443,40 +443,62 @@ bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ 
 //Guardar el grafo actualizado en un archivo JSON.
 
 void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json 
+    std::cout<<"Prueba"<<std::endl;
     nlohmann::json nuevoJson;
     verticeOrigen*temp=grafoRutas;
     int contador=0;
+    int menos=0;
+    // Iterar sobre los vértices del grafo
     while(temp!=NULL){
         nuevoJson["destinosVertice"][contador]["nombre"]=temp->nombreOrigen;
-        puntoDeEntrada*tempEntrada[3];
-        for(int p=0;p<3;p++){
-            tempEntrada[p]=temp->puntosDeEntrada[p];
+        for(int r=0;r<3;r++){ 
+            if(temp->puntosDeEntrada[r]==NULL){
+                menos++;
+            }
+            else if(temp->puntosDeEntrada==NULL){
+                std::cout<<"IMPOSIBLE"<<std::endl;
+            }
+            else{
+                std::cout<<"PruebaVertices1"<<std::endl;
+                nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["nombre"]=temp->puntosDeEntrada[r-menos]->nombre;
+                nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["tipo"]=temp->puntosDeEntrada[r-menos]->tipo;
+                std::cout<<"PruebaVertices2"<<std::endl;
+            }    
         }
-        for(int r=0;r<3;r++){
-            nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["nombre"]=tempEntrada[r]->nombre;
-            nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["tipo"]=tempEntrada[r]->tipo;
-        }
+        // Iterar sobre los arcos de ruta
         arcoRuta*tempRuta=temp->subListaArcos;
         while(tempRuta!=NULL){
+            // Json 
+            std::cout<<"PruebaArco1"<<std::endl;
+            nlohmann::json arcoJson;
             //Origen
-            nuevoJson["rutasArco"]["origen"]["nombre"]=tempRuta->origen->nombre;
-            nuevoJson["rutasArco"]["origen"]["punto de entrada"]=tempRuta->origen->puntoDeEntrada;
+            arcoJson["origen"]["nombre"]=tempRuta->origen->nombre;
+            //std::cout<<tempRuta->origen->puntoDeEntrada<<" pe1"<<std::endl;
+            arcoJson["origen"]["punto de entrada"]=tempRuta->origen->puntoDeEntrada;
             //destino
-            nuevoJson["rutasArco"]["destino"]["nombre"]=tempRuta->destino->nombre;
-            nuevoJson["rutasArco"]["destino"]["punto de entrada"]=tempRuta->destino->puntoDeEntrada;
+            arcoJson["destino"]["nombre"]=tempRuta->destino->nombre;
+            //std::cout<<tempRuta->destino->puntoDeEntrada<<" pe2"<<std::endl;
+            arcoJson["destino"]["punto de entrada"]=tempRuta->destino->puntoDeEntrada;
 
             //Transporte
-            nuevoJson["rutasArco"]["transporte"]=tempRuta->medioDeTransporte;
+            arcoJson["rutasArco"]["transporte"]=tempRuta->medioDeTransporte;
 
             //Horas
-            nuevoJson["rutasArco"]["horas"]=tempRuta->horasDeRuta;
+            arcoJson["horas"]=tempRuta->horasDeRuta;
+
+            // Agregar el arco a la lista de rutas
+            nuevoJson["rutasArco"].push_back(arcoJson);
+            
             tempRuta=tempRuta->sigA;
+            std::cout<<"PruebaArco2"<<std::endl;
         }
         contador++;
         temp=temp->sigV;
+        menos=0;
     }
-
+    // Guardar el JSON en un archivo
     std::ofstream jsonOut("json\\prueba.json");
+    std::cout<<"PruebaFINAL"<<std::endl;
     jsonOut << std::setw(4)<<nuevoJson;
 }
 
