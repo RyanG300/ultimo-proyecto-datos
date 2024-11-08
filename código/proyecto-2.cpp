@@ -89,8 +89,8 @@ string tipoPuntoEntradaGlobal;
 //--------------------------------------FUNCIONES AUXILIARES----------------------------------------
 //--------------------------------------FUNCIONES AUXILIARES----------------------------------------
 
-// 1)
-verticeOrigen *   buscarVertice(string origen){ //Si encuentra el vertice en el grafo lo devuelve, sino devuelve NULL
+// 1) Si encuentra el vertice en el grafo lo devuelve, sino devuelve NULL
+verticeOrigen *   buscarVertice(string origen){ 
         verticeOrigen *tempV = grafoRutas;
         while(tempV != NULL){
             if(tempV->nombreOrigen == origen)
@@ -101,8 +101,8 @@ verticeOrigen *   buscarVertice(string origen){ //Si encuentra el vertice en el 
     return NULL;//no lo encontro
 }
 
-// 2)
-void clearScreen(){ //Borrar pantalla, determina si el programa se esta corriendo desde windows o no. Asi para evitar problemas.
+// 2) Borrar pantalla, determina si el programa se esta corriendo desde windows o no. Asi para evitar problemas.
+void clearScreen(){ 
     #ifdef _WIN32
         system("cls");
     #else
@@ -110,8 +110,8 @@ void clearScreen(){ //Borrar pantalla, determina si el programa se esta corriend
     #endif
 }
 
-// 3)
-bool comprobarNombreGrafo(string nombre){ //Comprueba la repetición de un vértice en el grafo
+// 3) Comprueba la repetición de un vértice en el grafo
+bool comprobarNombreGrafo(string nombre){ 
     verticeOrigen*temp=grafoRutas;
     while(temp!=NULL){
         if(temp->nombreOrigen==nombre){
@@ -122,8 +122,8 @@ bool comprobarNombreGrafo(string nombre){ //Comprueba la repetición de un vért
     return true;
 }
 
-// 4)
-void imprimirPuntosDeEntrada(string origen,bool bloquearDiferenteTipo=false){ //Busca el vertice por nombre y imprime sus puntos de entrada
+// 4) Busca el vertice por nombre y imprime sus puntos de entrada
+void imprimirPuntosDeEntrada(string origen,bool bloquearDiferenteTipo=false){ 
     verticeOrigen *tempV = grafoRutas;
     int contador;
     while(tempV != NULL){
@@ -150,8 +150,8 @@ void imprimirPuntosDeEntrada(string origen,bool bloquearDiferenteTipo=false){ //
     return;
 }
 
-// 5)
-bool buscarPuntoDeEntradaEspecifico(string nombreVertice,string nombrePuntoEntrada){ //Busca el punto de entrada de un vértice por nombre especifico
+// 5) Busca el punto de entrada de un vértice por nombre especifico
+bool buscarPuntoDeEntradaEspecifico(string nombreVertice,string nombrePuntoEntrada){ 
     verticeOrigen *tempV = grafoRutas;
     while(tempV != NULL){
         if(tempV->nombreOrigen == nombreVertice){
@@ -168,7 +168,17 @@ bool buscarPuntoDeEntradaEspecifico(string nombreVertice,string nombrePuntoEntra
     return false;
 }
 
+// 6) Cambia visitado de todos los verticeOrigen en grafoRutas 
+void desmarcar(){ 
+        verticeOrigen *tempV = grafoRutas;
 
+        while(tempV != NULL){
+
+            tempV->visitado = false;
+
+            tempV = tempV->sigV;
+        }
+}
 
 
 // 3) //Duerme
@@ -214,7 +224,8 @@ void crearGrafoJsonVertices(){ //Función para inicializar el grafo "grafoRutas"
 
 }
 
-void crearGrafoJsonArcos(){ //Función auxiliar a "crearGrafoJsonVertices", encargada de crear las rutas con "arcoRuta".
+//Función auxiliar a "crearGrafoJsonVertices", encargada de crear las rutas con "arcoRuta".
+void crearGrafoJsonArcos(){ 
     ifstream jsonFilePrueba("json\\DatosDestinoRuta.json");
     nlohmann::json dataJson = nlohmann::json::parse(jsonFilePrueba);
     for(int i=0;i<dataJson["rutasArco"].size();i++){
@@ -261,7 +272,8 @@ void agregarVertice(string nombreOrigen,puntoDeEntrada*fronteras[3]){ //Agrega u
 
 }
 
-bool eliminarVertice(string nombreAEliminar){ //Elimina el vértice de grafo, junto a los arcos que apuntan a el
+//Elimina el vértice de grafo, junto a los arcos que apuntan a el
+bool eliminarVertice(string nombreAEliminar){ 
     //Aquí borramos el vértice del grafo
     verticeOrigen*temp1=grafoRutas;
     bool eliminado=false;
@@ -320,7 +332,8 @@ bool eliminarVertice(string nombreAEliminar){ //Elimina el vértice de grafo, ju
     return eliminado;
 }
 
-void imprimirVertices(){ //Para mostrar el usuario los vertices disponibles para eliminar
+//Para mostrar el usuario los vertices disponibles para eliminar
+void imprimirVertices(){ 
     verticeOrigen*temp=grafoRutas;
     int contador;
     while(temp!=NULL){
@@ -353,7 +366,8 @@ bool insertarArcos(string origen,int horasRuta,string medioDeTransporte,string n
     return true;
 }
 
-bool eliminarArco(string origen,string destino,int indexRuta){ //Recibe el string de origen y destino, comprueba si existe el arco entre esos vértices y elimina el arco.
+//Recibe el string de origen y destino, comprueba si existe el arco entre esos vértices y elimina el arco.
+bool eliminarArco(string origen,string destino,int indexRuta){ 
     verticeOrigen*temp=grafoRutas;
     int contador=0; //Index exacto de las rutas (arcos)
     std::cout<<"Prueba 1"<<std::endl;
@@ -394,7 +408,8 @@ bool eliminarArco(string origen,string destino,int indexRuta){ //Recibe el strin
     return false;
 }
 
-void imprimirRuta(string origen,string destino){ //Imprime todas las rutas que conecten los dos vértices recibidos
+//Imprime todas las rutas que conecten los dos vértices recibidos
+void imprimirRuta(string origen,string destino){ 
     verticeOrigen*temp=grafoRutas;
     int contador=0; //Index exacto de las rutas (arcos)
     while(temp!=NULL){
@@ -418,7 +433,8 @@ void imprimirRuta(string origen,string destino){ //Imprime todas las rutas que c
 
 }
 
-bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ //Modifica el tiempo de la ruta del arco escogido
+//Modifica el tiempo de la ruta del arco escogido
+bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ 
     verticeOrigen*temp=grafoRutas;
     int contador=0;
     while(temp!=NULL){
@@ -439,9 +455,9 @@ bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ 
     return false;
 }
 
+
 // 4)
 //Guardar el grafo actualizado en un archivo JSON.
-
 void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json
     std::cout<<"Prueba"<<std::endl;
     nlohmann::json nuevoJson;
@@ -509,7 +525,6 @@ void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json
 
 // 1)
 //Imprimir el grafo en amplitud, mostrar Origen Destino, medio y horas.
-
 void imprimirGrafoAmplitud(){
     verticeOrigen*tempV =grafoRutas;
     int contador;
@@ -529,36 +544,26 @@ void imprimirGrafoAmplitud(){
 
 // 2)
 //Imprimir el grafo en profundidad, se debe indicar por el usuario final el inicio del recorrido, mostrar Origen Destino.
-
-void profundidad (struct Vertice *inicio){
-        if((inicio == NULL) or (inicio->visitado== true)){
+void profundidad ( verticeOrigen*inicio,int contador=0){
+        if((inicio == NULL) || (inicio->visitado== true)){
                 cout<<endl;
             return;
         }
 
         inicio->visitado = true;
 
-        struct Arco *tempA = inicio->subListaArcos;
+        arcoRuta *tempA = inicio->subListaArcos;
         while(tempA != NULL){
-            cout<<inicio->nombre<<tempA->destino<<tempA->distancia<<",  ";
-
-            profundidad(buscarVertice(tempA->destino));
+            cout<<contador<<") "<<inicio->nombreOrigen<<" -> "<<tempA->destino->nombre<<" Tiempo: "<<tempA->horasDeRuta<<", ";
+            
+            profundidad(buscarVertice(tempA->destino->nombre),contador+1);
 
             tempA = tempA->sigA;
         }
 
 }
 
-void desmarcar(){
-        struct Vertice *tempV = grafo;
 
-        while(tempV != NULL){
-
-            tempV->visitado = false;
-
-            tempV = tempV->sigV;
-        }
-}
 
 
 
@@ -1111,6 +1116,31 @@ int main(){
 
                     }
                     case 2:{ //Imprimir el grafo en profundidad (2)
+                        string origen;
+                        while(true){
+                            clearScreen();
+                            if(grafoRutas==NULL){
+                                std::cout<<"Grafo vacio, volviendo al menú..."<<std::endl;
+                                sleep(2);
+                                break;
+                            }
+                            imprimirVertices();
+                            std::cout<<std::endl<<"Inserte el vértice en el cual desea empezar a imprimir en profundidad (nombre): ";
+                            getline(std::cin,origen);
+                            if(!comprobarNombreGrafo(origen)){
+                                verticeOrigen*tempV=buscarVertice(origen);
+                                profundidad(tempV);
+                                string salirCualquiera;
+                                std::cout<<std::endl<<"Inserte cualquier tecla para salir: ";
+                                getline(std::cin,salirCualquiera);
+                                break;
+                            }
+                            else{
+                                clearScreen();
+                                std::cout<<"Nombre inválido, volviendo...."<<std::endl;
+                                sleep(2);
+                            }
+                        }
                         continue;
                     }
                     case 3:{ //Imprimir la lista de premios (3)
