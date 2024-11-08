@@ -143,7 +143,7 @@ void imprimirPuntosDeEntrada(string origen,bool bloquearDiferenteTipo=false){ //
                 }
             }
             return;
- 
+
         }
         tempV = tempV->sigV;
     }
@@ -258,7 +258,7 @@ void agregarVertice(string nombreOrigen,puntoDeEntrada*fronteras[3]){ //Agrega u
         temp->sigV=nuevoVertice;
         nuevoVertice->antV = temp;
     }
-    
+
 }
 
 bool eliminarVertice(string nombreAEliminar){ //Elimina el vértice de grafo, junto a los arcos que apuntan a el
@@ -330,7 +330,7 @@ void imprimirVertices(){ //Para mostrar el usuario los vertices disponibles para
     }
 }
 
-// 3) 
+// 3)
 // Agregar, eliminar y modificar arcos.
 bool insertarArcos(string origen,int horasRuta,string medioDeTransporte,string nombrePuntoEntrada,string nombrePuntoLlegada,string destino){
     verticeOrigen *vOrigen = buscarVertice(origen);
@@ -415,7 +415,7 @@ void imprimirRuta(string origen,string destino){ //Imprime todas las rutas que c
         temp=temp->sigV;
     }
     std::cout<<"No hay rutas desde "<<origen<<" hacia "<<destino<<". Escriba 'salir' para volver: ";
-    
+
 }
 
 bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ //Modifica el tiempo de la ruta del arco escogido
@@ -442,7 +442,7 @@ bool modificarArco(string origen,string destino,int nuevoTiempo,int indexRuta){ 
 // 4)
 //Guardar el grafo actualizado en un archivo JSON.
 
-void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json 
+void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json
     std::cout<<"Prueba"<<std::endl;
     nlohmann::json nuevoJson;
     verticeOrigen*temp=grafoRutas;
@@ -451,7 +451,7 @@ void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json
     // Iterar sobre los vértices del grafo
     while(temp!=NULL){
         nuevoJson["destinosVertice"][contador]["nombre"]=temp->nombreOrigen;
-        for(int r=0;r<3;r++){ 
+        for(int r=0;r<3;r++){
             if(temp->puntosDeEntrada[r]==NULL){
                 menos++;
             }
@@ -463,12 +463,12 @@ void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json
                 nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["nombre"]=temp->puntosDeEntrada[r-menos]->nombre;
                 nuevoJson["destinosVertice"][contador]["puntosDeEntrada"][r]["tipo"]=temp->puntosDeEntrada[r-menos]->tipo;
                 std::cout<<"PruebaVertices2"<<std::endl;
-            }    
+            }
         }
         // Iterar sobre los arcos de ruta
         arcoRuta*tempRuta=temp->subListaArcos;
         while(tempRuta!=NULL){
-            // Json 
+            // Json
             std::cout<<"PruebaArco1"<<std::endl;
             nlohmann::json arcoJson;
             //Origen
@@ -488,7 +488,7 @@ void guardarGrafoRutaJson(){ //Guarda el grafo en el archivo json
 
             // Agregar el arco a la lista de rutas
             nuevoJson["rutasArco"].push_back(arcoJson);
-            
+
             tempRuta=tempRuta->sigA;
             std::cout<<"PruebaArco2"<<std::endl;
         }
@@ -527,7 +527,38 @@ void imprimirGrafoAmplitud(){
     }
 }
 
+// 2)
+//Imprimir el grafo en profundidad, se debe indicar por el usuario final el inicio del recorrido, mostrar Origen Destino.
 
+void profundidad (struct Vertice *inicio){
+        if((inicio == NULL) or (inicio->visitado== true)){
+                cout<<endl;
+            return;
+        }
+
+        inicio->visitado = true;
+
+        struct Arco *tempA = inicio->subListaArcos;
+        while(tempA != NULL){
+            cout<<inicio->nombre<<tempA->destino<<tempA->distancia<<",  ";
+
+            profundidad(buscarVertice(tempA->destino));
+
+            tempA = tempA->sigA;
+        }
+
+}
+
+void desmarcar(){
+        struct Vertice *tempV = grafo;
+
+        while(tempV != NULL){
+
+            tempV->visitado = false;
+
+            tempV = tempV->sigV;
+        }
+}
 
 
 
@@ -582,11 +613,11 @@ int main(){
                     <<std::endl<<"Registrar premio obtenido a un cliente (10)."
                     <<std::endl<<"Volver (11)."
                     <<std::endl<<"Inserte la opción deseada: ";
-                
+
                 std::cin>>opcion2;
                 std::cin.ignore(10000,'\n');
 
-                switch(opcion2){ 
+                switch(opcion2){
                     case 1:{ //Cargar el grafo guardado en el archivo DatosDestinoRuta.json (1).
                         clearScreen();
                         if(!carga){
@@ -609,7 +640,7 @@ int main(){
                         std::cout<<"Inserte la opción deseada: "
                             <<std::endl<<"Agregar vértice (1)."
                             <<std::endl<<"Eliminar vértice (2)."<<std::endl;
-                        
+
                         std::cin>>subOpcion;
                         std::cin.ignore(10000,'\n');
                         if(subOpcion==1){ //Agregar vértice (1)
@@ -683,7 +714,7 @@ int main(){
                                                 }
                                             }
                                             agregarVertice(nombre,fronteras);
-                                            string cualquieraTecla; 
+                                            string cualquieraTecla;
                                             std::cout<<"Destino (vértice) añadido con éxito"<<std::endl;
                                             std::cout<<"Inserte cualquier tecla para continuar para continuar: "<<std::endl;
                                             getline(std::cin,cualquieraTecla);
@@ -704,7 +735,7 @@ int main(){
                                     sleep(2);
                                 }
 
-                        } 
+                        }
                             continue;
                         }
                         if(subOpcion==2){ //Eliminar vértice (2)
@@ -730,12 +761,12 @@ int main(){
                                         sleep(2);
                                     }
 
-                                }   
+                                }
                                 else{
                                     std::cout<<"Sin vértices en el grafo, volviendo al menú..."<<std::endl;
                                     sleep(2);
                                     break;
-                                }                                    
+                                }
                             }
                             continue;
                         }
@@ -745,7 +776,7 @@ int main(){
                             sleep(2);
                             continue;
                         }
-                         
+
                     }
                     case 3:{ //Agregar, eliminar y modificar arcos (3).
                         clearScreen();
@@ -790,7 +821,7 @@ int main(){
                                                                 clearScreen();
                                                                 if(tipoPuntoEntradaGlobal=="Terminal/frontera"){
                                                                     medioDeTransporte="auto";
-                                                                }  
+                                                                }
                                                                 else if(tipoPuntoEntradaGlobal=="Aeropuerto"){
                                                                     medioDeTransporte="avión";
                                                                 }
@@ -848,7 +879,7 @@ int main(){
                                                 }
                                             }
                                             break;
-                                            
+
                                         }
                                         else{
                                             clearScreen();
@@ -911,7 +942,7 @@ int main(){
                                             std::cout<<"El vértice otorgado no existe, volviendo..."<<std::endl;
                                             sleep(2);
                                         }
-                                    }    
+                                    }
                                     continue;
                                 }
                                 case 3:{ // Modificar arco (3)
@@ -971,8 +1002,8 @@ int main(){
                                             sleep(2);
                                         }
                                     }
-                                    
-                                    continue; 
+
+                                    continue;
                                 }
                                 case 4:{ //Salir (4)
                                     continue;
@@ -984,8 +1015,8 @@ int main(){
                                 }
 
                             }
-                        
-                        
+
+
                         continue;
                     }
                     case 4:{ //Guardar el grafo actualizado en un archivo JSON (4).
@@ -1030,7 +1061,7 @@ int main(){
                         continue;
                     }
                     case 11:{ //Volver (11).
-                        salirDatos=true;                
+                        salirDatos=true;
                     }
                 }
             }
@@ -1111,8 +1142,8 @@ int main(){
                 }
 
             }
-            
-            
+
+
             continue;
         }
         case 3:{ //Consultas (3)
