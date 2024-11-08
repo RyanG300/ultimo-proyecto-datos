@@ -30,6 +30,7 @@ struct puntoDeEntrada{
 struct verticeOrigen{ //string nombreOrigen / puntoDeEntrada*puntosDeEntrada[3] /Lista de vértices doble
     string nombreOrigen;
     puntoDeEntrada*puntosDeEntrada[3];
+    int cantidadVisitas;
 
     struct verticeOrigen * sigV;//para enlazar todos los vertices en una lista
     verticeOrigen*antV;
@@ -52,6 +53,7 @@ struct verticeOrigen{ //string nombreOrigen / puntoDeEntrada*puntosDeEntrada[3] 
         antV = NULL;
         subListaArcos = NULL;
         visitado = false;
+        cantidadVisitas=0;
     }
 };
 
@@ -561,6 +563,21 @@ void profundidad ( verticeOrigen*inicio,int contador=0){
             tempA = tempA->sigA;
         }
 
+}
+
+// 7)
+//Imprimir destinos del grafo que no hay recibido visitas.
+void imprimirDestinosSinVisitas(){
+    verticeOrigen*tempV=grafoRutas;
+    int contador;
+
+    while(tempV!=NULL){
+        if(tempV->cantidadVisitas==0){
+            std::cout<<contador<<") "<<tempV->nombreOrigen<<std::endl;
+            contador++;
+        }
+        tempV=tempV->sigV;
+    }
 }
 
 
@@ -1077,11 +1094,11 @@ int main(){
             int opcion3;
             bool salirReportes=false;
             while(true){
+                clearScreen();
                 if(salirReportes){
                     salirReportes=false;
                     break;
                 }
-                clearScreen();
                 std::cout<< "    ==============================================    "
                <<std::endl<<"                 REPORTES DEL GRAFO                   "
                <<std::endl<<"    ==============================================    "<<std::endl<<std::endl;
@@ -1108,6 +1125,7 @@ int main(){
                             continue;
                         }
                         else{
+                            std::cout<<"Gafo en amplitud: "<<std::endl<<std::endl;
                             imprimirGrafoAmplitud();
                             std::cout<<std::endl<<"Digite cualquier tecla para salir: ";
                             getline(std::cin,salir);
@@ -1129,6 +1147,8 @@ int main(){
                             getline(std::cin,origen);
                             if(!comprobarNombreGrafo(origen)){
                                 verticeOrigen*tempV=buscarVertice(origen);
+                                clearScreen();
+                                std::cout<<"Grafo en profundidad: "<<std::endl<<std::endl;
                                 profundidad(tempV);
                                 string salirCualquiera;
                                 std::cout<<std::endl<<"Inserte cualquier tecla para salir: ";
@@ -1156,10 +1176,20 @@ int main(){
                         continue;
                     }
                     case 7:{ //Imprimir destinos del grafo sin visita (7)
+                        clearScreen();
+                        string salirCualquiera;
+                        if(grafoRutas==NULL){
+                            std::cout<<"Grafo vacio, volviendo al menú..."<<std::endl;
+                            sleep(2);
+                            continue;
+                        }
+                        std::cout<<"Destinos sin visitas: "<<std::endl<<std::endl;
+                        imprimirDestinosSinVisitas();
+                        std::cout<<std::endl<<"Inserte cualquier tecla para continuar: ";
+                        getline(std::cin,salirCualquiera);
                         continue;
                     }
                     case 8:{ //Volver al menú principal (8)
-                        clearScreen();
                         salirReportes=true;
                         continue;
                     }
