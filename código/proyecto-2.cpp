@@ -1,6 +1,6 @@
 #include <iostream>
 #include <map>
-#include "header\json.hpp"
+#include "header/json.hpp"
 #include <fstream>
 #include <unistd.h>
 
@@ -12,10 +12,11 @@
 #endif
 
 using namespace std;
+using json = nlohmann::json;
 
-//----------------------------------------------STRUCT----------------------------------------------
-//----------------------------------------------STRUCT----------------------------------------------
-//----------------------------------------------STRUCT----------------------------------------------
+//----------------------------------------------STRUCT & CLASS----------------------------------------------
+//----------------------------------------------STRUCT & CLASS----------------------------------------------
+//----------------------------------------------STRUCT & CLASS----------------------------------------------
 
 struct puntoDeEntrada{
     string nombre;
@@ -80,6 +81,148 @@ struct arcoRuta{ //Lista de arcos doble
         sigA = NULL;
         origen = new indicacionesRuta(nomb1,pun1);
         destino = new indicacionesRuta(nomb2,pun2);
+    }
+};
+
+class Premio {
+public:
+    std::string nombre;
+    int puntosMinimos;
+
+    Premio(const std::string& nombre, int puntos) : nombre(nombre), puntosMinimos(puntos) {}
+};
+
+class Cliente {
+public:
+    string nombre;
+    vector<string> destinosVisitados;
+    int puntosAcumulados = 0;
+    vector<string> premiosObtenidos;
+
+    Cliente() = default;
+
+    Cliente(const string& nombre) : nombre(nombre), puntosAcumulados(0) {}
+
+    void agregarDestino(const string& destino, int horas, const string medio) {
+        destinosVisitados.push_back(destino);
+        acumularPuntos(horas, medio);
+    }
+
+    void acumularPuntos(int horas, string medio) {
+        int puntos = 0;
+        if (medio == "Avion") {
+            puntos += horas * 100;
+        } else if (medio == "Crucero") {
+            puntos += horas * 70;
+        } else if (medio == "Auto") {
+            puntos += horas * 25;
+        }
+
+        if (destinosVisitados.size() > 15) {
+            puntos *= 2;
+        } else if (destinosVisitados.size() > 10) {
+            puntos *= 1.5;
+        } else if (destinosVisitados.size() >= 5) {
+            puntos *= 1.2;
+        }
+
+        puntosAcumulados += puntos;
+    }
+
+    bool canjearPremio(const Premio& premio) {
+        if (puntosAcumulados >= premio.puntosMinimos) {
+            puntosAcumulados -= premio.puntosMinimos;
+            premiosObtenidos.push_back(premio.nombre);
+            return true;
+        }
+        return false;
+    }
+
+    json toJSON() const {
+        return {
+                {"nombre", nombre},
+                {"destinosVisitados", destinosVisitados},
+                {"puntosAcumulados", puntosAcumulados},
+                {"premiosObtenidos", premiosObtenidos}
+        };
+    }
+};
+
+class GestorClientes {
+private:
+    std::unordered_map<string, Cliente> clientes;
+    std::vector<Premio> premios;
+
+public:
+    void agregarCliente(const string& nombre) {
+        clientes[nombre] = Cliente(nombre);
+    }
+
+    Cliente* buscarCliente(const string& nombre) {
+        auto it = clientes.find(nombre);
+        if (it != clientes.end()) {
+            return &it->second;
+        }
+        return nullptr;
+    }
+
+    void eliminarCliente(const string& nombre) {
+        auto it = clientes.find(nombre);
+        if (it != clientes.end()) {
+            clientes.erase(it);
+        }
+    }
+
+    void registrarViaje(const string& nombreCliente, const string& destino, const int horas, const string& medio) {
+        Cliente* cliente = buscarCliente(nombreCliente);
+        if (cliente) {
+            cliente->agregarDestino(destino, horas, medio);
+        }
+    }
+
+    void canjearPremio(const std::string& nombreCliente, const std::string& nombrePremio) {
+        Cliente* cliente = buscarCliente(nombreCliente);
+        for (const Premio& premio : premios) {
+            if (premio.nombre == nombrePremio) {
+                if (cliente && cliente->canjearPremio(premio)) {
+                    std::cout << "Premio canjeado con éxito.\n";
+                } else {
+                    std::cout << "No tiene puntos suficientes.\n";
+                }
+                return;
+            }
+        }
+        std::cout << "Premio no encontrado.\n";
+    }
+
+    void guardarClientesJSON(const std::string& nombreArchivo) {
+        json j;
+        for (const auto& par : clientes) {
+            j["json/clientesDatos"].push_back(par.second.toJSON());
+        }
+        std::ofstream archivo(nombreArchivo);
+        archivo << j.dump(4);
+    }
+
+    void cargarClientesJSON(const string& nombreArchivo) {
+        ifstream archivo(nombreArchivo);
+        json j;
+        archivo >> j;
+        for (const auto& item : j["clientes"]) {
+            Cliente cliente(item["nombre"]);
+            cliente.puntosAcumulados = item["puntosAcumulados"];
+            for (const auto& destino : item["destinosVisitados"]) {
+                cliente.destinosVisitados.push_back(destino);
+            }
+            for (const auto& premio : item["premiosObtenidos"]) {
+                cliente.premiosObtenidos.push_back(premio);
+            }
+            clientes[cliente.nombre] = cliente;
+        }
+    }
+
+    void agregarPremio(const Premio& premio) {
+        premios.push_back(premio);
     }
 };
 
