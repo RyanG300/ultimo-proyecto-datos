@@ -11,6 +11,8 @@
     #include <unistd.h>
 #endif
 
+
+
 using namespace std;
 using json = nlohmann::json;
 
@@ -342,8 +344,21 @@ void desmarcar(){
 // 1)
 //Crear el grafo en una representación multilista, tomando los datos (vértices y arcos) del archivo JSON.
 void crearGrafoJsonVertices(){ //Función para inicializar el grafo "grafoRutas" con la información del json "DatosDestinoRuta.json".
-    ifstream jsonFilePrueba("json\\DatosDestinoRuta.json");
+    ifstream jsonFilePrueba("json/DatosDestinoRuta.json");
+    if (!jsonFilePrueba.is_open()) {
+        cerr << "Error al abrir el archivo" << endl;
+        return;
+    }
+
     nlohmann::json dataJson = nlohmann::json::parse(jsonFilePrueba);
+
+    try {
+        jsonFilePrueba >> dataJson;
+    } catch (nlohmann::json::parse_error& e) {
+        cerr << "Error de parseo: " << e.what() << endl;
+        return;
+    }
+
     for(int a=0;a<dataJson["destinosVertice"].size();a++){
         nlohmann::json dataDos =dataJson["destinosVertice"][a];
         if(grafoRutas==NULL){
@@ -371,8 +386,15 @@ void crearGrafoJsonVertices(){ //Función para inicializar el grafo "grafoRutas"
 
 //Función auxiliar a "crearGrafoJsonVertices", encargada de crear las rutas con "arcoRuta".
 void crearGrafoJsonArcos(){ 
-    ifstream jsonFilePrueba("json\\DatosDestinoRuta.json");
+    ifstream jsonFilePrueba("json/DatosDestinoRuta.json");
+    if (!jsonFilePrueba.is_open()) {
+        cerr << "Error al abrir el archivo" << endl;
+        return;
+    }
+
+
     nlohmann::json dataJson = nlohmann::json::parse(jsonFilePrueba);
+
     for(int i=0;i<dataJson["rutasArco"].size();i++){
         nlohmann::json dataDos =dataJson["rutasArco"][i];
 
@@ -723,9 +745,157 @@ void imprimirDestinosSinVisitas(){
     }
 }
 
+void mostrarMenuPrincipal() {
+    clearScreen();
+    std::cout<<"     ==============================================      "<<std::endl;
+    std::cout<<"                     VIAJES Y TAL S.A                    "<<std::endl;
+    std::cout<<"     ==============================================      "<<std::endl<<std::endl;
 
+    cout << "Bienvenido usuario, por favor seleccione la opción deseada: " << endl<<endl;
+    cout << "1. Gestión de destinos\n";
+    cout << "2. Gestión de clientes\n";
+    cout << "3. Gestión de Premios\n";
+    cout << "4. Reportes\n";
+    cout << "5. Consultas\n";
+    cout << "0. Salir";
+    
+}
 
+void gestionDestinos() {
+    int opcion;
+    do {
+        clearScreen();
+        cout << "---Gestión de destinos---\n";
+        cout << "1. Cargar datos\n";
+        cout << "2. Agregar destino\n";
+        cout << "3. Eliminar destino\n";
+        cout << "4. Modificar Rutas entre destinos\n";
+        cout << "5. Guardar datos\n";
+        cout << "0. Volver al Menú Principal\n\n";
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+        cin.ignore(10000, '\n');
 
+        switch (opcion) {
+            case 1: continue;
+            case 2: continue;
+            case 3: continue;
+            case 4: continue;
+            case 5: continue;
+            case 0: cout << "Volviendo al menú principal...\n"; break;
+            default: cout << "Opción inválida, intente de nuevo\n";
+        }
+    } while (opcion != 0);
+}
+
+void gestionClientes() {
+    int opcion;
+    do {
+        clearScreen();
+        cout <<"---Gestión de clientes---\n";
+        cout << "1. Cargar datos\n";
+        cout << "2. Agregar cliente\n";
+        cout << "3. Eliminar cliente\n";
+        cout << "4. Buscar Cliente\n";
+        cout << "5. Registrar destino y acumular puntos\n";
+        cout << "6. Canjear premio\n";
+        cout << "7. Guardar datos\n";
+        cout << "0. Volver al Menú Principal\n\n";
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+        cin.ignore(10000, '\n');
+
+        switch (opcion) {
+            case 1: continue;
+            case 2: continue;
+            case 3: continue;
+            case 4: continue;
+            case 5: continue;
+            case 6: continue;
+            case 7: continue;
+            case 0: cout << "Volviendo al menú principal...\n"; break;
+            default: cout << "Opción inválida, intente de nuevo\n";
+        }
+    } while (opcion != 0);
+}
+
+void gestionPremios() {
+    int opcion;
+    do {
+        clearScreen();
+        cout <<"---Gestión de premios---\n";
+        cout << "1. Agregar premio\n";
+        cout << "2. Modificar premio\n";
+        cout << "3. Eliminar premio\n";
+        cout << "4. Ver lista de premios\n";
+        cout << "0. Volver al Menú Principal\n\n";
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1: continue;
+            case 2: continue;
+            case 3: continue;
+            case 4: continue;
+            case 0: cout << "Volviendo al menú principal...\n"; break;
+            default: cout << "Opción inválida, intente de nuevo\n";
+        }
+
+    } while (opcion != 0);
+}
+
+void reportes() {
+    int opcion;
+    do {
+        clearScreen();
+        cout <<"---Reportes---\n";
+        cout << "1. Imprimir grafo en amplitud\n";
+        cout << "2. Imprimir grafo en profundidad\n";
+        cout << "3. Imprimir destinos sin visitas\n";
+        cout << "4. Imprimir clientes con puntos\n";
+        cout << "5. Imprimir clientes con viajes\n";
+        cout << "6. Imprimir clientes con premios\n";
+        cout << "7. Imprimir lista de premios\n";
+        cout << "0. Volver al Menú Principal\n\n";
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1: continue;
+            case 2: continue;
+            case 3: continue;
+            case 4: continue;
+            case 5: continue;
+            case 6: continue;
+            case 7: continue;
+            case 0: cout << "Volviendo al menú principal...\n"; break;
+            default: cout << "Opción inválida, intente de nuevo\n";
+        }
+    } while (opcion != 0);
+}
+
+void consultas() {
+    int opcion;
+    do {
+        clearScreen();
+        cout <<"---Consultas---\n";
+        cout << "1. Mostrar rutas de un origen a un destino\n";
+        cout << "2. Ver rutas más frecuentes\n";
+        cout << "3. Ver rutas únicas\n";
+        cout << "0. Volver al Menú Principal\n\n";
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1: continue;
+            case 2: continue;
+            case 3: continue;
+            case 0: cout << "Volviendo al menú principal...\n"; break;
+            default: cout << "Opción inválida, intente de nuevo\n";
+        }
+    }while (opcion != 0);
+        
+}
 
 
 //---------------------------------------------MAIN-------------------------------------------------
@@ -735,6 +905,28 @@ void imprimirDestinosSinVisitas(){
 
 
 int main(){
+
+    int opcion;
+    do {
+        mostrarMenuPrincipal();
+        cout <<"\n\nSeleccione una opción: ";
+        cin >> opcion;
+
+        clearScreen();
+        switch (opcion) {
+            case 1: gestionDestinos(); break;
+            case 2: gestionClientes(); break;
+            case 3: gestionPremios(); break;
+            case 4: reportes(); break;
+            case 5: consultas(); break;
+            case 0: cout << "Saliendo del programa...\n"; break;
+            default: cout << "Opción inválida, intente de nuevo\n";
+        }
+    } while (opcion != 0);
+    return 0;
+
+
+    /*
     int opcion1;
     bool carga=false;
     while(true){
@@ -1374,4 +1566,6 @@ int main(){
 
     //cout<<dataJson["destinosVertice"][0]["nombre"].get<std::string>()<<endl;
     //cout<<dataJson<<endl;
+
+    
 }
