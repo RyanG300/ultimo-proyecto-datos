@@ -1,0 +1,15 @@
+{
+  "clientes": [
+    {
+      "destinosVisitados": [
+        "Paris",
+        "Madrid"
+      ],
+      "nombre": "Juan",
+      "premiosObtenidos": [
+        "Descuento en vuelo"
+      ],
+      "puntosAcumulados": 1250
+    }
+  ]
+}
