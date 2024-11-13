@@ -1,25 +1,34 @@
-{
-    "destinosVertice":[
+{"destinosVertice":[
         {
             "nombre": "Ciudad Quesada",
-            "puntosDeEntrada":[{
+            "puntosDeEntrada":[
+            {
                 "nombre":"Terminal Ciudad Quesada",
                 "tipo":"Terminal/frontera"
             },
             {
                 "nombre":"141 calle",
                 "tipo":"Terminal/frontera"   
+            },
+            {
+                "nombre":"140 calle",
+                "tipo":"Terminal/frontera"  
             }    
         ]
         },
         {
             "nombre": "Sucre",
-            "puntosDeEntrada":[{
+            "puntosDeEntrada":[
+            {
                 "nombre":"parada bus",
                 "tipo":"Terminal/frontera"
             },
             {
                 "nombre":"141 calle",
+                "tipo":"Terminal/frontera"   
+            },
+            {
+                "nombre":"calle sin nombre",
                 "tipo":"Terminal/frontera"   
             }    
         ]

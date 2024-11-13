@@ -1,9 +1,9 @@
 ----Gestión de Datos:
-1. Crear el grafo en una representación multilista, tomando los datos (vértices y arcos) del archivo JSON. [#Ryan]
-2. Agregar y eliminar vértices. [#Ryan]
-3. Agregar, eliminar y modificar arcos. [#Ryan]
-4. Guardar el grafo actualizado en un archivo JSON. [#Ryan]
-5. Crear los clientes en una estructura dinámica a escoger por el estudiante con sus respectivos viajes y premios obtenidos; tomando los datos del archivo JSON.
+1. Crear el grafo en una representación multilista, tomando los datos (vértices y arcos) del archivo JSON. [#Ryan] [#LISTO]
+2. Agregar y eliminar vértices. [#Ryan] [#LISTO] 
+3. Agregar, eliminar y modificar arcos. [#Ryan] [#LISTO]
+4. Guardar el grafo actualizado en un archivo JSON. [#Ryan] [#LISTO]
+5. Crear los clientes en una estructura dinámica a escoger por el estudiante con sus respectivos viajes y premios obtenidos; tomando los datos del archivo JSON. 
 6. Agregar, eliminar y buscar clientes.
 7. Guardar clientes actualizados en el archivo JSON.
 8. Crear, agregar, modificar y borrar en la lista simple de premios.
@@ -11,13 +11,13 @@
 10. Registrar premio obtenido a un cliente. Ver Consulta 2.
 
 ----Reportes:
-1. Imprimir el grafo en amplitud, mostrar Origen Destino, medio y horas. [#Ryan]
-2. Imprimir el grafo en profundidad, se debe indicar por el usuario final el inicio del recorrido, mostrar Origen Destino. [#Ryan]
+1. Imprimir el grafo en amplitud, mostrar Origen Destino, medio y horas. [#Ryan] [#LISTO]
+2. Imprimir el grafo en profundidad, se debe indicar por el usuario final el inicio del recorrido, mostrar Origen Destino. [#Ryan] [#LISTO]
 3. Imprimir la lista simple de premios usando recursividad, mostrando toda la información que guarda la lista, uno por cada reglón. [#Ryan]
 4. Imprimir todos los clientes mostrando nombre y puntos acumulados.
 5. Imprimir todos los clientes con viajes mostrando nombre y viajes. Omitir clientes sin viajes.
 6. Imprimir todos los clientes con premios mostrando nombre y premios. Omitir clientes sin premios.
-7. Imprimir destinos del grafo que no hay recibido visitas.
+7. Imprimir destinos del grafo que no hay recibido visitas. [#LISTO]
 
 ----Consultas:
 1. Mostrar todas las rutas posibles del origen X a un destino Y. Solicitarle al usuario el medio que desea usar, puede indicar un solo medio y/o dos medios que podrían combinarse durante la ruta..... (Hay más texto en el documento eh) [#Ryan]
