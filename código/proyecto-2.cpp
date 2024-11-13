@@ -815,6 +815,43 @@ void imprimirDestinosSinVisitas(){
 //-------------------------------------------CONSULTAS----------------------------------------------
 //-------------------------------------------CONSULTAS----------------------------------------------
 
+//Variables globales para consultas
+map<string,int> cantidadDePuntosPorRuta; 
+map<int,string> indiceRuta;
+int contadorIndiceRuta=0;   
+
+// 1)
+void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string ruta,int cantidadPuntos){
+    if((origen==NULL) || (origen->visitado==true)){
+        return; 
+    }
+
+    if(origen->nombre==destino){
+        cantidadDePuntosPorRuta[ruta]==cantidadPuntos;
+        indiceRuta[contadorIndiceRuta]==ruta;
+        contadorIndiceRuta++;
+        return;
+    } 
+    origen->visitado=true;
+
+    arcoRuta*tempA=origen->subListaArcos;
+    while(tempA!=NULL){
+        if(tempA->medioDeTransporte=="bus" || tempA->medioDeTransporte=="auto"){
+            cantidadPuntos+=25*tempA->horasDeRuta;
+        }
+        else if(tempA->medioDeTransporte=="avion" || tempA->medioDeTransporte=="avión"){
+            cantidadPuntos+=100*tempA->horasDeRuta;
+        }
+        else if(tempA->medioDeTransporte=="barco" || tempA->medioDeTransporte=="Barco"){
+            cantidadPuntos+=70*tempA->horasDeRuta;
+        }
+        imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+origen->nombreOrigen,cantidadPuntos);
+        tempA=tempA->sigA;
+    }
+    origen->visitado=false;
+
+}
+
 
 
 
@@ -1048,7 +1085,7 @@ void gestionDestinos() {
                                                                     medioDeTransporte="auto";
                                                                 }
                                                                 else if(tipoPuntoEntradaGlobal=="Aeropuerto"){
-                                                                    medioDeTransporte="avión";
+                                                                    medioDeTransporte="avion";
                                                                 }
                                                                 else if(tipoPuntoEntradaGlobal=="Muelle"){
                                                                     medioDeTransporte="barco";
@@ -1340,14 +1377,15 @@ void gestionClientes() {
                     cout << "Cliente no encontrado.\n";
                 }
             }
-            case 5: {
+            case 5: { //5. Registrar destino y acumular puntos
                 string clienteNombre;
                 string verticeOrigen;
                 string verticeDestino;
+                int cantidadMediosTransporte;
                 while(true){
                     clearScreen();
                     gestor.imprimirClientesConPuntos();
-                    std::cout<<std::endl<<std::endl<<"Escriba el nombre del cliente a registrarle destino (En caso no haya clientes digité 'salir'): ";
+                    std::cout<<std::endl<<std::endl<<"Escriba el nombre del cliente a registrarle destino (En caso no haya clientes digite 'salir'): ";
                     getline(std::cin,clienteNombre);
                     if(clienteNombre=="Salir" || clienteNombre=="salir"){
                         break;
@@ -1370,7 +1408,32 @@ void gestionClientes() {
                                     std::cout<<std::endl<<std::endl<<"Escriba el punto de destino desde donde se desea terminar la ruta: ";
                                     getline(std::cin,verticeDestino);
                                     if(!comprobarNombreGrafo(verticeDestino)){
-                                        
+                                        clearScreen();
+                                        std::cout<<"Cuantos medios de transporte se permiten para buscar la ruta (Máx 2)"<<std::endl;
+                                        std::cin>>cantidadMediosTransporte;
+                                        std::cin.ignore(10000,'\n');
+                                        if(cantidadMediosTransporte>2 || cantidadMediosTransporte<0){
+                                            cantidadMediosTransporte=2;
+                                        }
+                                        string mediosDeTransporteRuta[cantidadMediosTransporte];
+                                        for(int a=0;a<cantidadMediosTransporte;a++){
+                                            std::cout<<"Digite el medio de transporte que desea utilizar durante la ruta (Máx 2) "
+                                            <<std::endl<<"       ------ (1)Avion ------ (2)Auto ------ (3)Barco ------ "
+                                            <<std::endl<<std::endl<<"Escriba el nombre o el número del medio deseado: ";
+                                            getline(std::cin,mediosDeTransporteRuta[a]);
+                                            if(mediosDeTransporteRuta[a]=="Avion" || mediosDeTransporteRuta[a]=="avion" || mediosDeTransporteRuta[a]=="1"){
+                                                mediosDeTransporteRuta[a]=="Aeropuerto";
+                                            }
+                                            else if(mediosDeTransporteRuta[a]=="Auto" || mediosDeTransporteRuta[a]=="auto" || mediosDeTransporteRuta[a]=="2"){
+                                                mediosDeTransporteRuta[a]=="Terminal/frontera";
+                                            }
+                                            else if(mediosDeTransporteRuta[a]=="Barco" || mediosDeTransporteRuta[a]=="barco" || mediosDeTransporteRuta[a]=="3"){
+                                                mediosDeTransporteRuta[a]=="Muelle";
+                                            }
+                                            else{
+                                                mediosDeTransporteRuta[a]=="Terminal/frontera";
+                                            }
+                                        }
                                     }
                                     else{
                                         clearScreen();
