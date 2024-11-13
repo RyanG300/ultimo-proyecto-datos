@@ -233,7 +233,46 @@ public:
     void agregarPremio(const Premio& premio) {
         premios.push_back(premio);
     }
-};
+
+    void imprimirClientesConPuntos() {
+        for (const auto& par : clientes) {
+            cout << par.second.nombre << " (" << par.second.puntosAcumulados <<")\n";
+        }
+    }
+
+    void imprimirClientesConViajes() {
+        bool hayViajes = false;
+        for (const auto& par : clientes) {
+            if (!par.second.destinosVisitados.empty()) {
+                hayViajes = true;
+                std::cout << par.second.nombre << " ha visitado:\n";
+                for (const auto& destino : par.second.destinosVisitados) {
+                    std::cout << " - " << destino << "\n";
+                }
+            }
+        }
+        if (!hayViajes) {
+            std::cout << "No hay clientes con viajes registrados.\n";
+        }
+    }
+
+    void imprimirClientesConPremios() {
+        bool hayPremios = false;
+        for (const auto& par : clientes) {
+            if (!par.second.premiosObtenidos.empty()) {
+                hayPremios = true;
+                cout << par.second.nombre << " ha canjeado:\n";
+                for (const auto& premio : par.second.premiosObtenidos) {
+                    cout << " - " << premio << "\n";
+                }
+            }
+        }
+        if (!hayPremios) {
+            cout << "No hay clientes con premios canjeados.\n";
+        }
+    }
+
+}; GestorClientes gestor;
 
 //Variables globales
 verticeOrigen *grafoRutas;// el apuntador inicial del grafo
@@ -1229,10 +1268,56 @@ void gestionClientes() {
         cin.ignore(10000, '\n');
 
         switch (opcion) {
-            case 1: continue;
-            case 2: continue;
-            case 3: continue;
-            case 4: continue;
+            case 1: {
+                cout << "Cargando datos de clientes...\n";
+                gestor.cargarClientesJSON("json/clientesDatos.json");
+                cout << "Datos cargados con éxito.\n";
+                gestionClientes();
+            }
+            case 2: {
+                string nombre;
+                cout << "Ingrese el nombre del cliente: ";
+                getline(cin, nombre);
+                gestor.agregarCliente(nombre);
+                Cliente* cliente = gestor.buscarCliente(nombre);
+                if (cliente) {
+                    cout << "\nCliente agregado con éxito.\n";
+                }
+                gestionClientes();
+            }
+
+            case 3: {
+                string nombre;
+                cout << "Ingrese el nombre del cliente a eliminar: ";
+                getline(cin, nombre);
+                gestor.eliminarCliente(nombre);
+                Cliente* cliente = gestor.buscarCliente(nombre);
+                if (!cliente) {
+                    cout << "\nCliente eliminado con éxito.\n";
+                }
+                gestionClientes();
+            }
+            case 4: {
+                string nombre;
+                cout << "Ingrese el nombre del cliente a buscar: ";
+                getline(cin, nombre);
+                Cliente* cliente = gestor.buscarCliente(nombre);
+                if (cliente) {
+                    cout << "Cliente encontrado:\n";
+                    cout << "Nombre: " << cliente->nombre << "\n";
+                    cout << "Puntos acumulados: " << cliente->puntosAcumulados << "\n";
+                    cout << "Destinos visitados:\n";
+                    for (const string& destino : cliente->destinosVisitados) {
+                        cout << " - " << destino << "\n";
+                    }
+                    cout << "Premios obtenidos:\n";
+                    for (const string& premio : cliente->premiosObtenidos) {
+                        cout << " - " << premio << "\n";
+                    }
+                } else {
+                    cout << "Cliente no encontrado.\n";
+                }
+            }
             case 5: continue;
             case 6: continue;
             case 7: continue;
@@ -1344,9 +1429,27 @@ void reportes() {
                 getline(std::cin,salirCualquiera);
                 continue;  
             }
-            case 4: continue;
-            case 5: continue;
-            case 6: continue;
+            case 4: {
+                gestor.imprimirClientesConPuntos();
+                cout << "Presione enter para continuar...";
+                cin.ignore(10000, '\n');
+                cin.get();
+                break;
+            }
+            case 5: {
+                gestor.imprimirClientesConViajes();
+                cout << "Presione enter para continuar...";
+                cin.ignore(10000, '\n');
+                cin.get();
+                break;
+            }
+            case 6: {
+                gestor.imprimirClientesConPremios();
+                cout << "Presione enter para continuar...";
+                cin.ignore(10000, '\n');
+                cin.get();
+                break;
+            }
             case 7: continue;
             case 0: cout << "Volviendo al menú principal...\n"; break;
             default: cout << "Opción inválida, intente de nuevo\n";
@@ -1355,6 +1458,7 @@ void reportes() {
 }
 
 void consultas() {
+    GestorClientes gestor;
     int opcion;
     do {
         clearScreen();
@@ -1385,7 +1489,7 @@ void consultas() {
 
 
 int main(){
-
+    GestorClientes gestor;
     int opcion;
     do {
         mostrarMenuPrincipal();
