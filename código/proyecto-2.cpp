@@ -235,8 +235,10 @@ public:
     }
 
     void imprimirClientesConPuntos() {
+        int contador;
         for (const auto& par : clientes) {
-            cout << par.second.nombre << " (" << par.second.puntosAcumulados <<")\n";
+            std::cout <<contador<<") "<< par.second.nombre << " (" << par.second.puntosAcumulados <<")\n";
+            contador++;
         }
     }
 
@@ -271,6 +273,20 @@ public:
             cout << "No hay clientes con premios canjeados.\n";
         }
     }
+
+    //3) Imprimir la lista simple de premios usando recursividad, mostrando toda la información que guarda la lista, uno por cada reglón.
+    void imprimirListaPremios() {
+    if (premios.empty()) {
+        std::cout << "No hay premios registrados." << std::endl;
+    } else {
+        std::cout << "Lista de premios:\n";
+        int contador = 1;
+        for (const Premio& premio : premios) {
+            std::cout << contador << ". " << premio.nombre << " (Puntos mínimos: " << premio.puntosMinimos << ")" << std::endl;
+            contador++;
+        }
+    }
+}
 
 }; GestorClientes gestor;
 
@@ -625,7 +641,7 @@ bool eliminarArco(string origen,string destino,int indexRuta){
     return false;
 }
 
-//Imprime todas las rutas que conecten los dos vértices recibidos
+//Imprime todas las rutas que conecten los dos vértices recibidos (Solo arcos no rutas como tal)
 void imprimirRuta(string origen,string destino){ 
     verticeOrigen*temp=grafoRutas;
     int contador=0; //Index exacto de las rutas (arcos)
@@ -794,6 +810,13 @@ void imprimirDestinosSinVisitas(){
         tempV=tempV->sigV;
     }
 }
+
+//-------------------------------------------CONSULTAS----------------------------------------------
+//-------------------------------------------CONSULTAS----------------------------------------------
+//-------------------------------------------CONSULTAS----------------------------------------------
+
+
+
 
 
 /*---------------------------------------FUNCIONES AXULIARES MENU---------------------------------------
@@ -1268,13 +1291,13 @@ void gestionClientes() {
         cin.ignore(10000, '\n');
 
         switch (opcion) {
-            case 1: {
+            case 1: { //1. Cargar datos
                 cout << "Cargando datos de clientes...\n";
                 gestor.cargarClientesJSON("json/clientesDatos.json");
                 cout << "Datos cargados con éxito.\n";
                 gestionClientes();
             }
-            case 2: {
+            case 2: { //2. Agregar cliente
                 string nombre;
                 cout << "Ingrese el nombre del cliente: ";
                 getline(cin, nombre);
@@ -1285,8 +1308,7 @@ void gestionClientes() {
                 }
                 gestionClientes();
             }
-
-            case 3: {
+            case 3: { //3. Eliminar cliente
                 string nombre;
                 cout << "Ingrese el nombre del cliente a eliminar: ";
                 getline(cin, nombre);
@@ -1297,7 +1319,7 @@ void gestionClientes() {
                 }
                 gestionClientes();
             }
-            case 4: {
+            case 4: { //4. Buscar Cliente
                 string nombre;
                 cout << "Ingrese el nombre del cliente a buscar: ";
                 getline(cin, nombre);
@@ -1318,7 +1340,61 @@ void gestionClientes() {
                     cout << "Cliente no encontrado.\n";
                 }
             }
-            case 5: continue;
+            case 5: {
+                string clienteNombre;
+                string verticeOrigen;
+                string verticeDestino;
+                while(true){
+                    clearScreen();
+                    gestor.imprimirClientesConPuntos();
+                    std::cout<<std::endl<<std::endl<<"Escriba el nombre del cliente a registrarle destino (En caso no haya clientes digité 'salir'): ";
+                    getline(std::cin,clienteNombre);
+                    if(clienteNombre=="Salir" || clienteNombre=="salir"){
+                        break;
+                    }
+                    else if(buscarCliente(clienteNombre)!=NULL){
+                        while(true){
+                            clearScreen();
+                            if(grafoRutas==NULL || grafoRutas->sigV==NULL){
+                                std::cout<<"La lista de destinos esta vacia, y por lo tanto no se puede realizar una ruta, volviendo al menú..."<<std::endl;
+                                sleep(2);
+                                break;
+                            }
+                            imprimirVertices();
+                            std::cout<<std::endl<<std::endl<<"Escriba el punto de origen desde donde se desea empezar la ruta: ";
+                            getline(std::cin,verticeOrigen);
+                            if(!comprobarNombreGrafo(verticeOrigen)){
+                                while(true){
+                                    clearScreen();
+                                    imprimirVertices();
+                                    std::cout<<std::endl<<std::endl<<"Escriba el punto de destino desde donde se desea terminar la ruta: ";
+                                    getline(std::cin,verticeDestino);
+                                    if(!comprobarNombreGrafo(verticeDestino)){
+                                        
+                                    }
+                                    else{
+                                        clearScreen();
+                                        std::cout<<"Punto de origen inválido, volviendo..."<<std::endl;
+                                        sleep(2);        
+                                    }
+                                }
+                            }
+                            else{
+                                clearScreen();
+                                std::cout<<"Punto de origen inválido, volviendo..."<<std::endl;
+                                sleep(2);
+                            }
+                        }      
+                        break;
+                    }
+                    else{
+                        clearScreen();
+                        std::cout<<"Nombre inválido, volviendo..."<<std::endl;
+                        sleep(2);
+                    }
+                }
+                continue;
+            }
             case 6: continue;
             case 7: continue;
             case 0: cout << "Volviendo al menú principal...\n"; break;
@@ -1429,28 +1505,34 @@ void reportes() {
                 getline(std::cin,salirCualquiera);
                 continue;  
             }
-            case 4: {
+            case 4: { //4. Imprimir clientes con puntos
                 gestor.imprimirClientesConPuntos();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
                 cin.get();
                 break;
             }
-            case 5: {
+            case 5: { //5. Imprimir clientes con viajes
                 gestor.imprimirClientesConViajes();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
                 cin.get();
                 break;
             }
-            case 6: {
+            case 6: { //6. Imprimir clientes con premios
                 gestor.imprimirClientesConPremios();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
                 cin.get();
                 break;
             }
-            case 7: continue;
+            case 7: { //7. Imprimir lista de premios
+                gestor.imprimirListaPremios();
+                cout << "Presione enter para continuar...";
+                cin.ignore(10000, '\n');
+                cin.get();
+                continue;
+            }
             case 0: cout << "Volviendo al menú principal...\n"; break;
             default: cout << "Opción inválida, intente de nuevo\n";
         }
