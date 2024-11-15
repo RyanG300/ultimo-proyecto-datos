@@ -1455,7 +1455,8 @@ void gestionClientes() {
                                         map<string,bool> mediosDeTransporteRuta=prohibirCiertosTransporte();
                                         verticeOrigen*realVerticeOrigen=buscarVertice(verticeOrigenn);
                                         imprimirRutasPorMedioTransporte(realVerticeOrigen,verticeDestino,realVerticeOrigen->nombreOrigen,0,mediosDeTransporteRuta);
-                                        int contador=0;    
+                                        int contador=0; 
+                                        clearScreen();   
                                         for(auto par : cantidadDePuntosPorRuta){
                                             std::cout<<contador<<") Ruta: "<<par.first;
                                             if(contador<10){
@@ -1464,6 +1465,9 @@ void gestionClientes() {
                                             else{
                                                 std::cout<<std::endl<<"    Cantidad de puntos: "<<par.second;
                                             }
+                                        }
+                                        if(cantidadDePuntosPorRuta.empty()){
+                                            std::cout<<"----------------Sin ruta posibles, digite salir----------------"<<std::endl<<std::endl;
                                         }
                                         string opcionRuta;
                                         std::cout<<std::endl<<std::endl<<"Seleccione la ruta deseada para llegar a su destino, o por el contrario escriba 'salir': ";
