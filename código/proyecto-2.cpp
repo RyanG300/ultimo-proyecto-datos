@@ -107,20 +107,20 @@ public:
 
     Cliente(const string& nombre) : nombre(nombre), puntosAcumulados(0) {}
 
-    void agregarDestino(const string& destino, int horas, const string medio) {
+    void agregarDestino(const string& destino, int puntos) {
         destinosVisitados.push_back(destino);
-        acumularPuntos(horas, medio);
+        acumularPuntos(puntos);
     }
 
-    void acumularPuntos(int horas, string medio) {
-        int puntos = 0;
+    void acumularPuntos(int puntos) { //int horas, string medio
+        /*int puntos = 0;
         if (medio == "Avion") {
             puntos += horas * 100;
         } else if (medio == "Crucero") {
             puntos += horas * 70;
         } else if (medio == "Auto") {
             puntos += horas * 25;
-        }
+        }*/
 
         if (destinosVisitados.size() > 15) {
             puntos *= 2;
@@ -153,11 +153,10 @@ public:
 };
 
 class GestorClientes {
-private:
+public:
     std::unordered_map<string, Cliente> clientes;
     std::vector<Premio> premios;
 
-public:
     // 6) Agregar, eliminar y buscar clientes.
     void agregarCliente(const string& nombre) {
         clientes[nombre] = Cliente(nombre);
@@ -179,10 +178,10 @@ public:
     }
 
     // 9) Registrar destino y puntos de viaje a un cliente. Ver Consulta 1.
-    void registrarViaje(const string& nombreCliente, const string& destino, const int horas, const string& medio) {
+    void registrarViaje(const string& nombreCliente, const string& destino, int puntos) {
         Cliente* cliente = buscarCliente(nombreCliente);
         if (cliente) {
-            cliente->agregarDestino(destino, horas, medio);
+            cliente->agregarDestino(destino,puntos);
         }
     }
 
@@ -235,7 +234,7 @@ public:
     }
 
     void imprimirClientesConPuntos() {
-        int contador;
+        int contador=0;
         for (const auto& par : clientes) {
             std::cout <<contador<<") "<< par.second.nombre << " (" << par.second.puntosAcumulados <<")\n";
             contador++;
@@ -816,17 +815,17 @@ void imprimirDestinosSinVisitas(){
 //-------------------------------------------CONSULTAS----------------------------------------------
 
 //Variables globales para consultas
-map<string,int> cantidadDePuntosPorRuta; 
+map<string,int> cantidadDePuntosPorRuta; //Las rutas disponibles de un punto a otro se almacena aquí
 map<int,string> indiceRuta;
 int contadorIndiceRuta=0;   
 
-// 1)
-void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string ruta,int cantidadPuntos){
+// 1.1)Mostrar todas las rutas posibles del origen X a un destino Y. Solicitarle al usuario el medio que desea usar, puede indicar un solo medio y/o dos medios que podrían combinarse durante la ruta.
+void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string ruta,int cantidadPuntos,map<string,bool> mediosDeTransporteNoPermitidos){
     if((origen==NULL) || (origen->visitado==true)){
         return; 
     }
 
-    if(origen->nombre==destino){
+    if(origen->nombreOrigen==destino){
         cantidadDePuntosPorRuta[ruta]==cantidadPuntos;
         indiceRuta[contadorIndiceRuta]==ruta;
         contadorIndiceRuta++;
@@ -836,23 +835,63 @@ void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string 
 
     arcoRuta*tempA=origen->subListaArcos;
     while(tempA!=NULL){
-        if(tempA->medioDeTransporte=="bus" || tempA->medioDeTransporte=="auto"){
+        if((tempA->medioDeTransporte=="auto" && !mediosDeTransporteNoPermitidos["auto"]) || (tempA->medioDeTransporte=="avion" && !mediosDeTransporteNoPermitidos["avion"]) || (tempA->medioDeTransporte=="barco" && !mediosDeTransporteNoPermitidos["barco"])){
+            tempA=tempA->sigA;    
+        }
+        else{
+            if(tempA->medioDeTransporte=="bus" || tempA->medioDeTransporte=="auto"){
             cantidadPuntos+=25*tempA->horasDeRuta;
+            }
+            else if(tempA->medioDeTransporte=="avion" || tempA->medioDeTransporte=="avión"){
+                cantidadPuntos+=100*tempA->horasDeRuta;
+            }
+            else if(tempA->medioDeTransporte=="barco" || tempA->medioDeTransporte=="Barco"){
+                cantidadPuntos+=70*tempA->horasDeRuta;
+            }
+            imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+origen->nombreOrigen,cantidadPuntos,mediosDeTransporteNoPermitidos);
+            tempA=tempA->sigA;
         }
-        else if(tempA->medioDeTransporte=="avion" || tempA->medioDeTransporte=="avión"){
-            cantidadPuntos+=100*tempA->horasDeRuta;
-        }
-        else if(tempA->medioDeTransporte=="barco" || tempA->medioDeTransporte=="Barco"){
-            cantidadPuntos+=70*tempA->horasDeRuta;
-        }
-        imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+origen->nombreOrigen,cantidadPuntos);
-        tempA=tempA->sigA;
     }
     origen->visitado=false;
 
 }
 
+map<string,bool> prohibirCiertosTransporte(){
+    int cantidadMediosTransporte;
+    clearScreen();
+    std::cout<<"Cuantos medios de transporte se permiten para buscar la ruta (Máx 2)"<<std::endl;
+    std::cin>>cantidadMediosTransporte;
+    std::cin.ignore(10000,'\n');
+    if(cantidadMediosTransporte>2 || cantidadMediosTransporte<0){
+        cantidadMediosTransporte=2;
+    }
+    map <string,bool> mediosDeTransporteRuta;
+    string transporteTemp;
+    for(int a=0;a<cantidadMediosTransporte;a++){
+        std::cout<<"Digite el medio de transporte que desea utilizar durante la ruta (Máx 2) "
+        <<std::endl<<"       ------ (1)Avion ------ (2)Auto ------ (3)Barco ------ "
+        <<std::endl<<std::endl<<"Escriba el nombre o el número del medio deseado: ";
+        getline(std::cin,transporteTemp);
+        if(transporteTemp=="Avion" || transporteTemp=="avion" || transporteTemp=="1"){
+            transporteTemp=="avion";
+            mediosDeTransporteRuta[transporteTemp]==false;
+        }
+        else if(transporteTemp=="Auto" || transporteTemp=="auto" || transporteTemp=="2"){
+            transporteTemp=="auto";
+            mediosDeTransporteRuta[transporteTemp]==false;
+        }
+        else if(transporteTemp=="Barco" || transporteTemp=="barco" || transporteTemp=="3"){
+            transporteTemp=="barco";
+            mediosDeTransporteRuta[transporteTemp]==false;
+        }
+        else{
+            transporteTemp=="auto";
+            mediosDeTransporteRuta[transporteTemp]==false;
+        }
+    }
+    return mediosDeTransporteRuta; 
 
+}
 
 
 
@@ -1315,7 +1354,7 @@ void gestionClientes() {
     do {
         clearScreen();
         cout <<"---Gestión de clientes---\n";
-        cout << "1. Cargar datos\n";
+        cout << "1. Cargar datos de los clientes\n";
         cout << "2. Agregar cliente\n";
         cout << "3. Eliminar cliente\n";
         cout << "4. Buscar Cliente\n";
@@ -1329,12 +1368,15 @@ void gestionClientes() {
 
         switch (opcion) {
             case 1: { //1. Cargar datos
+                clearScreen();
                 cout << "Cargando datos de clientes...\n";
                 gestor.cargarClientesJSON("json/clientesDatos.json");
                 cout << "Datos cargados con éxito.\n";
+                sleep(2);
                 gestionClientes();
             }
             case 2: { //2. Agregar cliente
+                clearScreen();
                 string nombre;
                 cout << "Ingrese el nombre del cliente: ";
                 getline(cin, nombre);
@@ -1346,6 +1388,7 @@ void gestionClientes() {
                 gestionClientes();
             }
             case 3: { //3. Eliminar cliente
+                clearScreen();
                 string nombre;
                 cout << "Ingrese el nombre del cliente a eliminar: ";
                 getline(cin, nombre);
@@ -1357,6 +1400,7 @@ void gestionClientes() {
                 gestionClientes();
             }
             case 4: { //4. Buscar Cliente
+                clearScreen();
                 string nombre;
                 cout << "Ingrese el nombre del cliente a buscar: ";
                 getline(cin, nombre);
@@ -1379,9 +1423,8 @@ void gestionClientes() {
             }
             case 5: { //5. Registrar destino y acumular puntos
                 string clienteNombre;
-                string verticeOrigen;
+                string verticeOrigenn;
                 string verticeDestino;
-                int cantidadMediosTransporte;
                 while(true){
                     clearScreen();
                     gestor.imprimirClientesConPuntos();
@@ -1390,7 +1433,7 @@ void gestionClientes() {
                     if(clienteNombre=="Salir" || clienteNombre=="salir"){
                         break;
                     }
-                    else if(buscarCliente(clienteNombre)!=NULL){
+                    else if(gestor.buscarCliente(clienteNombre)!=NULL){
                         while(true){
                             clearScreen();
                             if(grafoRutas==NULL || grafoRutas->sigV==NULL){
@@ -1400,8 +1443,8 @@ void gestionClientes() {
                             }
                             imprimirVertices();
                             std::cout<<std::endl<<std::endl<<"Escriba el punto de origen desde donde se desea empezar la ruta: ";
-                            getline(std::cin,verticeOrigen);
-                            if(!comprobarNombreGrafo(verticeOrigen)){
+                            getline(std::cin,verticeOrigenn);
+                            if(!comprobarNombreGrafo(verticeOrigenn)){
                                 while(true){
                                     clearScreen();
                                     imprimirVertices();
@@ -1409,31 +1452,38 @@ void gestionClientes() {
                                     getline(std::cin,verticeDestino);
                                     if(!comprobarNombreGrafo(verticeDestino)){
                                         clearScreen();
-                                        std::cout<<"Cuantos medios de transporte se permiten para buscar la ruta (Máx 2)"<<std::endl;
-                                        std::cin>>cantidadMediosTransporte;
-                                        std::cin.ignore(10000,'\n');
-                                        if(cantidadMediosTransporte>2 || cantidadMediosTransporte<0){
-                                            cantidadMediosTransporte=2;
-                                        }
-                                        string mediosDeTransporteRuta[cantidadMediosTransporte];
-                                        for(int a=0;a<cantidadMediosTransporte;a++){
-                                            std::cout<<"Digite el medio de transporte que desea utilizar durante la ruta (Máx 2) "
-                                            <<std::endl<<"       ------ (1)Avion ------ (2)Auto ------ (3)Barco ------ "
-                                            <<std::endl<<std::endl<<"Escriba el nombre o el número del medio deseado: ";
-                                            getline(std::cin,mediosDeTransporteRuta[a]);
-                                            if(mediosDeTransporteRuta[a]=="Avion" || mediosDeTransporteRuta[a]=="avion" || mediosDeTransporteRuta[a]=="1"){
-                                                mediosDeTransporteRuta[a]=="Aeropuerto";
-                                            }
-                                            else if(mediosDeTransporteRuta[a]=="Auto" || mediosDeTransporteRuta[a]=="auto" || mediosDeTransporteRuta[a]=="2"){
-                                                mediosDeTransporteRuta[a]=="Terminal/frontera";
-                                            }
-                                            else if(mediosDeTransporteRuta[a]=="Barco" || mediosDeTransporteRuta[a]=="barco" || mediosDeTransporteRuta[a]=="3"){
-                                                mediosDeTransporteRuta[a]=="Muelle";
+                                        map<string,bool> mediosDeTransporteRuta=prohibirCiertosTransporte();
+                                        verticeOrigen*realVerticeOrigen=buscarVertice(verticeOrigenn);
+                                        imprimirRutasPorMedioTransporte(realVerticeOrigen,verticeDestino,realVerticeOrigen->nombreOrigen,0,mediosDeTransporteRuta);
+                                        int contador=0;    
+                                        for(auto par : cantidadDePuntosPorRuta){
+                                            std::cout<<contador<<") Ruta: "<<par.first;
+                                            if(contador<10){
+                                                std::cout<<std::endl<<"   Cantidad de puntos: "<<par.second;
                                             }
                                             else{
-                                                mediosDeTransporteRuta[a]=="Terminal/frontera";
+                                                std::cout<<std::endl<<"    Cantidad de puntos: "<<par.second;
                                             }
                                         }
+                                        string opcionRuta;
+                                        std::cout<<std::endl<<std::endl<<"Seleccione la ruta deseada para llegar a su destino, o por el contrario escriba 'salir': ";
+                                        getline(std::cin,opcionRuta);
+                                        try{
+                                            clearScreen();
+                                            int indexExacto=stoi(opcionRuta);
+                                            int puntos=cantidadDePuntosPorRuta[indiceRuta[indexExacto]];
+                                            gestor.registrarViaje(clienteNombre,verticeDestino,puntos);
+                                            std::cout<<"Se registro el viaje hacia "<<verticeDestino<<" del cliente "<<clienteNombre<<" con éxito. Volviendo al menú"<<std::endl;
+                                            sleep(2);
+                                            break;
+                                        }
+                                        catch(int myNum){
+                                            clearScreen();
+                                            std::cout<<"Volviendo al menú..."<<std::endl;
+                                            sleep(2);
+                                            break;
+                                        }
+                                        
                                     }
                                     else{
                                         clearScreen();

@@ -38,7 +38,7 @@
         {
             "origen": {"nombre":"Ciudad Quesada","punto de entrada":"Terminal Ciudad Quesada"},
             "destino":{"nombre":"Sucre","punto de entrada":"parada bus"},
-            "transporte":"bus",
+            "transporte":"auto",
             "horas":5
         }
     ]    
