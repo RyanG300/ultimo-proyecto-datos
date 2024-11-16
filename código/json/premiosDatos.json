@@ -1,0 +1,25 @@
+{
+    "premios":[
+    {
+        "nombre": "Vacaciones pagadas",
+        "puntosMinimos": 900
+    },
+    {
+        "nombre": "Un télefono samsung A25",
+        "puntosMinimos": 350
+
+    },
+    {
+        "nombre": "Un oso de peluche",
+        "puntosMinimos": 10
+    },
+    {
+        "nombre": "Una casa en Sucre, Ciudad Quesada",
+        "puntosMinimos": 2000
+    },
+    {
+        "nombre": "Teclado red Dragon",
+        "puntosMinimos": 100
+    }
+    ]
+}

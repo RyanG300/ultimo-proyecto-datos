@@ -228,10 +228,22 @@ public:
         }
     }
 
+    void cargarPremiosJSON(const string& nombreArchivo){
+        ifstream archivo(nombreArchivo);
+        nlohmann::json j;
+        archivo >> j;
+        for(auto item : j["premios"]){
+            Premio premio(item["nombre"],item["puntosMinimos"]);
+            premios[premio.nombre] = premio;
+        }
+    }
+
     // 8) ?
     void agregarPremio(const Premio& premio) {
         premios.push_back(premio);
     }
+
+    
 
     void imprimirClientesConPuntos() {
         int contador=0;
@@ -278,7 +290,7 @@ public:
     if (premios.empty()) {
         std::cout << "No hay premios registrados." << std::endl;
     } else {
-        std::cout << "Lista de premios:\n";
+        std::cout << "----------Lista de premios----------\n\n";
         int contador = 1;
         for (const Premio& premio : premios) {
             std::cout << contador << ". " << premio.nombre << " (Puntos mínimos: " << premio.puntosMinimos << ")" << std::endl;
@@ -826,9 +838,10 @@ void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string 
     }
 
     if(origen->nombreOrigen==destino){
-        cantidadDePuntosPorRuta[ruta]==cantidadPuntos;
-        indiceRuta[contadorIndiceRuta]==ruta;
+        cantidadDePuntosPorRuta[ruta]=cantidadPuntos;
+        indiceRuta[contadorIndiceRuta]=ruta;
         contadorIndiceRuta++;
+        //std::cout<<"Si llege"<<std::endl;
         return;
     } 
     origen->visitado=true;
@@ -836,6 +849,7 @@ void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string 
     arcoRuta*tempA=origen->subListaArcos;
     while(tempA!=NULL){
         if((tempA->medioDeTransporte=="auto" && !mediosDeTransporteNoPermitidos["auto"]) || (tempA->medioDeTransporte=="avion" && !mediosDeTransporteNoPermitidos["avion"]) || (tempA->medioDeTransporte=="barco" && !mediosDeTransporteNoPermitidos["barco"])){
+            //std::cout<<"Me fui xdd"<<std::endl;
             tempA=tempA->sigA;    
         }
         else{
@@ -848,7 +862,7 @@ void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string 
             else if(tempA->medioDeTransporte=="barco" || tempA->medioDeTransporte=="Barco"){
                 cantidadPuntos+=70*tempA->horasDeRuta;
             }
-            imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+origen->nombreOrigen,cantidadPuntos,mediosDeTransporteNoPermitidos);
+            imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+tempA->destino->nombre,cantidadPuntos,mediosDeTransporteNoPermitidos);
             tempA=tempA->sigA;
         }
     }
@@ -873,20 +887,20 @@ map<string,bool> prohibirCiertosTransporte(){
         <<std::endl<<std::endl<<"Escriba el nombre o el número del medio deseado: ";
         getline(std::cin,transporteTemp);
         if(transporteTemp=="Avion" || transporteTemp=="avion" || transporteTemp=="1"){
-            transporteTemp=="avion";
-            mediosDeTransporteRuta[transporteTemp]==false;
+            transporteTemp="avion";
+            mediosDeTransporteRuta[transporteTemp]=true;
         }
         else if(transporteTemp=="Auto" || transporteTemp=="auto" || transporteTemp=="2"){
-            transporteTemp=="auto";
-            mediosDeTransporteRuta[transporteTemp]==false;
+            transporteTemp="auto";
+            mediosDeTransporteRuta[transporteTemp]=true;
         }
         else if(transporteTemp=="Barco" || transporteTemp=="barco" || transporteTemp=="3"){
-            transporteTemp=="barco";
-            mediosDeTransporteRuta[transporteTemp]==false;
+            transporteTemp="barco";
+            mediosDeTransporteRuta[transporteTemp]=true;
         }
         else{
-            transporteTemp=="auto";
-            mediosDeTransporteRuta[transporteTemp]==false;
+            transporteTemp="auto";
+            mediosDeTransporteRuta[transporteTemp]=true;
         }
     }
     return mediosDeTransporteRuta; 
@@ -1374,6 +1388,7 @@ void gestionClientes() {
                 cout << "Datos cargados con éxito.\n";
                 sleep(2);
                 gestionClientes();
+                continue;
             }
             case 2: { //2. Agregar cliente
                 clearScreen();
@@ -1386,6 +1401,7 @@ void gestionClientes() {
                     cout << "\nCliente agregado con éxito.\n";
                 }
                 gestionClientes();
+                continue;
             }
             case 3: { //3. Eliminar cliente
                 clearScreen();
@@ -1398,6 +1414,7 @@ void gestionClientes() {
                     cout << "\nCliente eliminado con éxito.\n";
                 }
                 gestionClientes();
+                continue;
             }
             case 4: { //4. Buscar Cliente
                 clearScreen();
@@ -1420,6 +1437,7 @@ void gestionClientes() {
                 } else {
                     cout << "Cliente no encontrado.\n";
                 }
+                continue;
             }
             case 5: { //5. Registrar destino y acumular puntos
                 string clienteNombre;
@@ -1455,8 +1473,9 @@ void gestionClientes() {
                                         map<string,bool> mediosDeTransporteRuta=prohibirCiertosTransporte();
                                         verticeOrigen*realVerticeOrigen=buscarVertice(verticeOrigenn);
                                         imprimirRutasPorMedioTransporte(realVerticeOrigen,verticeDestino,realVerticeOrigen->nombreOrigen,0,mediosDeTransporteRuta);
+                                        desmarcar();
                                         int contador=0; 
-                                        clearScreen();   
+                                        //clearScreen();   
                                         for(auto par : cantidadDePuntosPorRuta){
                                             std::cout<<contador<<") Ruta: "<<par.first;
                                             if(contador<10){
@@ -1512,8 +1531,37 @@ void gestionClientes() {
                 }
                 continue;
             }
-            case 6: continue;
-            case 7: continue;
+            case 6: { //6. Canjear premio
+                string nombreCliente;
+                while(true){
+                    clearScreen();
+                    if(gestor.clientes.empty()){
+                        std::cout<<"No hay clientes en la base de datos, volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        break;
+                    }
+                    gestor.imprimirClientesConPuntos();
+                    std::cout<<std::endl<<std::endl<<"Escriba el nombre del cliente al cual se desea canjear un premio: ";
+                    getline(std::cin,nombreCliente);
+                    if(gestor.buscarCliente(nombreCliente)!=NULL){
+
+                    }
+                    else{
+                        clearScreen();
+                        std::cout<<"Nombre de cliente inválido, vuelva a intentarlo..."<<std::endl;
+                        sleep(2);
+                    }
+                
+                }
+                continue;  
+            }
+            case 7: { //7. Guardar datos
+                clearScreen();
+                gestor.guardarClientesJSON("json\\clientesDatos.json");
+                std::cout<<"Guardado con éxito, volviendo al menú..."<<std::endl;
+                sleep(2);
+                continue;
+            }
             case 0: cout << "Volviendo al menú principal...\n"; break;
             default: cout << "Opción inválida, intente de nuevo\n";
         }
@@ -1529,15 +1577,56 @@ void gestionPremios() {
         cout << "2. Modificar premio\n";
         cout << "3. Eliminar premio\n";
         cout << "4. Ver lista de premios\n";
+        cout << "5. Cargar premios (Datos quemados)\n"
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
         cin >> opcion;
+        cin.ignore(10000, '\n');
 
         switch (opcion) {
-            case 1: continue;
-            case 2: continue;
+            case 1: {
+                string nombrePremio;
+                int costoPuntos;
+                while(true){
+                    clearScreen();
+                    gestor.imprimirListaPremios();
+                    std::cout<<std::endl<<std::endl<<"Ingrese el nombre del premio a insertar (No puede ser repetido): ";
+                    getline(std::cin,nombrePremio);
+                    if(gesto.premios.find(nombrePremio)==NULL){
+                        clearScreen();
+                        std::cout<<"Ingrese el valor en puntos del premio a insertar: ";
+                        std::cin>>costoPuntos;
+                        cin.ignore(10000, '\n');
+                        if(costoPuntos<0){
+                            costoPuntos=10;
+                        }
+                        Premio premio(nombrePremio,costoPuntos);
+                        gestor.agregarPremio(premio);                      
+                        clearScreen();
+                        std::cout<<"Premio añadido con éxito, volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        break;
+                    }
+                    else{
+                        clearScreen();
+                        std::cout<<"El nombre del premio a insertar ya está en uso, por favor vuelva a intentarlo..."<<std::endl;
+                        sleep(2);
+                    }
+                }
+                continue;
+                
+            }
+            case 2: {
+
+            }
             case 3: continue;
             case 4: continue;
+            case 5: {
+                clearScreen();
+                gestor.cargarPremiosJSON();
+                std::cout<<"Premios cargados, volviendo al menú..."<<std::endl;
+                sleep(2);
+            }
             case 0: cout << "Volviendo al menú principal...\n"; break;
             default: cout << "Opción inválida, intente de nuevo\n";
         }
@@ -1560,6 +1649,7 @@ void reportes() {
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
         cin >> opcion;
+        cin.ignore(10000, '\n');
 
         switch (opcion) {
             case 1: { //1 Imprimir grafo en amplitud
@@ -1595,6 +1685,7 @@ void reportes() {
                         clearScreen();
                         std::cout<<"Grafo en profundidad: "<<std::endl<<std::endl;
                         profundidad(tempV);
+                        desmarcar();
                         string salirCualquiera;
                         std::cout<<std::endl<<"Inserte cualquier tecla para salir: ";
                         getline(std::cin,salirCualquiera);
@@ -1668,6 +1759,7 @@ void consultas() {
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
         cin >> opcion;
+        cin.ignore(10000, '\n');
 
         switch (opcion) {
             case 1: continue;
