@@ -232,18 +232,64 @@ public:
         ifstream archivo(nombreArchivo);
         nlohmann::json j;
         archivo >> j;
+        int contador=0;
         for(auto item : j["premios"]){
             Premio premio(item["nombre"],item["puntosMinimos"]);
-            premios[premio.nombre] = premio;
+            premios[contador] = premio;
+            contador++;
         }
     }
 
-    // 8) ?
+    // 8) Crear, agregar, modificar y borrar en la lista simple de premios.
     void agregarPremio(const Premio& premio) {
         premios.push_back(premio);
     }
 
+    void modificarPremio(int indexPremio,string nombrePremio,int nuevoPrecioPuntos){
+        for(int a=0;a<premios.size();a++){
+            if(a==indexPremio){
+                premios[a].nombre=nombrePremio;
+                premios[a].puntosMinimos=nuevoPrecioPuntos;
+            }
+        }
+    }
     
+    bool eliminarPremio(string nombreBuscar){
+        for(int a=0;a<premios.size();a++){
+            if(premios[a].nombre==nombreBuscar){
+                if(a==premios.size()-1){
+                    premios.pop_back();
+                    return true;
+                }
+                else{
+                    vector<Premio> nuevosPremios;
+                    while(true){
+                        if(premios.back().nombre==nombreBuscar){
+                            premios.pop_back();
+                        }
+                        else{
+                            nuevosPremios.push_back(premios.back());
+                            premios.pop_back();
+                        }
+                        if(premios.empty()){
+                            premios=nuevosPremios;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    bool verificarSiPremioRepetidoNombre(string nombreComprobar){ //Devuelve true si se comprueba que el nuevo nombre de un premio es igual a uno de los presentes en la lista de premios
+        for(int a=0;a<premios.size();a++){
+            if(premios[a].nombre==nombreComprobar){
+                return true;
+            }
+        }
+        return false;
+    }
 
     void imprimirClientesConPuntos() {
         int contador=0;
@@ -291,9 +337,9 @@ public:
         std::cout << "No hay premios registrados." << std::endl;
     } else {
         std::cout << "----------Lista de premios----------\n\n";
-        int contador = 1;
+        int contador = 0;
         for (const Premio& premio : premios) {
-            std::cout << contador << ". " << premio.nombre << " (Puntos mínimos: " << premio.puntosMinimos << ")" << std::endl;
+            std::cout << contador << ") " << premio.nombre << " (Puntos mínimos: " << premio.puntosMinimos << ")" << std::endl;
             contador++;
         }
     }
@@ -1576,15 +1622,15 @@ void gestionPremios() {
         cout << "1. Agregar premio\n";
         cout << "2. Modificar premio\n";
         cout << "3. Eliminar premio\n";
-        cout << "4. Ver lista de premios\n";
-        cout << "5. Cargar premios (Datos quemados)\n"
+        //cout << "4. Ver lista de premios\n";
+        cout << "4. Cargar premios (Datos quemados)\n";
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
         cin >> opcion;
         cin.ignore(10000, '\n');
 
         switch (opcion) {
-            case 1: {
+            case 1: { //1. Agregar premio
                 string nombrePremio;
                 int costoPuntos;
                 while(true){
@@ -1592,38 +1638,113 @@ void gestionPremios() {
                     gestor.imprimirListaPremios();
                     std::cout<<std::endl<<std::endl<<"Ingrese el nombre del premio a insertar (No puede ser repetido): ";
                     getline(std::cin,nombrePremio);
-                    if(gesto.premios.find(nombrePremio)==NULL){
-                        clearScreen();
-                        std::cout<<"Ingrese el valor en puntos del premio a insertar: ";
-                        std::cin>>costoPuntos;
-                        cin.ignore(10000, '\n');
-                        if(costoPuntos<0){
-                            costoPuntos=10;
+                    for(int e=0;e<gestor.premios.size();e++){
+                        if(gestor.premios[e].nombre==nombrePremio){
+                            clearScreen();
+                            std::cout<<"El nombre del premio a insertar ya está en uso, por favor vuelva a intentarlo..."<<std::endl;
+                            sleep(2);
+                            continue;
                         }
-                        Premio premio(nombrePremio,costoPuntos);
-                        gestor.agregarPremio(premio);                      
-                        clearScreen();
-                        std::cout<<"Premio añadido con éxito, volviendo al menú..."<<std::endl;
-                        sleep(2);
-                        break;
                     }
-                    else{
-                        clearScreen();
-                        std::cout<<"El nombre del premio a insertar ya está en uso, por favor vuelva a intentarlo..."<<std::endl;
-                        sleep(2);
+                    clearScreen();
+                    std::cout<<"Ingrese el valor en puntos del premio a insertar: ";
+                    std::cin>>costoPuntos;
+                    cin.ignore(10000, '\n');
+                    if(costoPuntos<0){
+                        costoPuntos=10;
                     }
+                    Premio premio(nombrePremio,costoPuntos);
+                    gestor.agregarPremio(premio);                      
+                    clearScreen();
+                    std::cout<<"Premio añadido con éxito, volviendo al menú..."<<std::endl;
+                    sleep(2);
+                    break;
+                    
                 }
                 continue;
                 
             }
-            case 2: {
-
+            case 2: { //2. Modificar premio
+                int indexPremio;
+                string nuevoNombrePremio;
+                int nuevoCostoPuntos;
+                while(true){
+                    clearScreen();
+                    if(gestor.premios.empty()){
+                        std::cout<<"La lista de premios está vacia, volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        break;
+                    }
+                    gestor.imprimirListaPremios();
+                    std::cout<<std::endl<<std::endl<<"Escriba el número del premio a modificar: ";
+                    try{
+                        std::cin>>indexPremio;
+                        cin.ignore(10000, '\n');
+                        if(indexPremio>gestor.premios.size() || indexPremio<0){
+                            clearScreen();
+                            std::cout<<"Error, número digitado inválido, volviendo al menú..."<<std::endl;
+                            sleep(2);
+                            break;
+                        }
+                        clearScreen();
+                        std::cout<<"Escriba el nuevo nombre del premio: ";
+                        getline(std::cin,nuevoNombrePremio);
+                        if(gestor.verificarSiPremioRepetidoNombre(nuevoNombrePremio)){
+                            clearScreen();
+                            std::cout<<"Error, el nuevo nombre digitado es igual a uno presente en la lista de premios, volviendo al menú...";
+                            sleep(2);
+                            break;
+                        }
+                        std::cout<<std::endl<<"Escriba el nuevo coste en puntos del premio: ";
+                        std::cin>>nuevoCostoPuntos;
+                        cin.ignore(10000, '\n');
+                        if(nuevoCostoPuntos<0){
+                            nuevoCostoPuntos=10;
+                        }
+                        gestor.modificarPremio(indexPremio,nuevoNombrePremio,nuevoCostoPuntos);
+                        clearScreen();
+                        std::cout<<"El premio escogido fue modificado con éxito, volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        break;
+                    }
+                    catch(int a){
+                        clearScreen();
+                        std::cout<<"Error, no se digito un número, volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        break;
+                    }
+                    break;                 
+                }
+                continue;
             }
-            case 3: continue;
-            case 4: continue;
-            case 5: {
+            case 3: { //3. Eliminar premio
+                string nombrePremio;
                 clearScreen();
-                gestor.cargarPremiosJSON();
+                if(gestor.premios.empty()){
+                    std::cout<<"La lista de premios está vacia, volviendo al menú..."<<std::endl;
+                    sleep(2);
+                    continue;
+                }
+                gestor.imprimirListaPremios();
+                std::cout<<std::endl<<std::endl<<"Escriba el nombre del premio a eliminar: ";
+                getline(std::cin,nombrePremio);
+                if(gestor.eliminarPremio(nombrePremio)){
+                    clearScreen();
+                    std::cout<<"Premio eliminado con éxito, volviendo al menú..."<<std::endl;
+                    sleep(2);
+                    continue;
+                }
+                else{
+                    clearScreen();
+                    std::cout<<"Error, el nombre insertado no se encuentra en la lista de premios, volviendo al menú..."<<std::endl;
+                    sleep(2);
+                    continue;
+                }
+                
+            }
+            case 4: { //4. Cargar premios (Datos quemados)
+                clearScreen();
+                gestor.cargarPremiosJSON("json\\premiosDatos.json");
                 std::cout<<"Premios cargados, volviendo al menú..."<<std::endl;
                 sleep(2);
             }
