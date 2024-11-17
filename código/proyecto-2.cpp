@@ -232,11 +232,20 @@ public:
         ifstream archivo(nombreArchivo);
         nlohmann::json j;
         archivo >> j;
-        int contador=0;
+        bool romper=false;
         for(auto item : j["premios"]){
-            Premio premio(item["nombre"],item["puntosMinimos"]);
-            premios[contador] = premio;
-            contador++;
+            Premio premio(item["nombre"].get<std::string>(),item["puntosMinimos"].get<unsigned int>());
+            for(int e=0;e<premios.size();e++){
+                if(premio.nombre==premios[e].nombre){
+                    romper=true;
+                    break; 
+                }
+            }
+            if(romper){
+                romper=false;
+                continue;
+            }
+            premios.push_back(premio);
         }
     }
 
@@ -332,18 +341,65 @@ public:
     }
 
     //3) Imprimir la lista simple de premios usando recursividad, mostrando toda la información que guarda la lista, uno por cada reglón.
-    void imprimirListaPremios() {
+    bool imprimirListaPremios() {
     if (premios.empty()) {
         std::cout << "No hay premios registrados." << std::endl;
-    } else {
+        return false;
+    } 
+    else {
         std::cout << "----------Lista de premios----------\n\n";
         int contador = 0;
         for (const Premio& premio : premios) {
             std::cout << contador << ") " << premio.nombre << " (Puntos mínimos: " << premio.puntosMinimos << ")" << std::endl;
             contador++;
         }
+        return true;
     }
 }
+
+    void imprimirPremiosDisponiblesComprar(int puntosCliente){ 
+        std::cout<<"-------Premios disponibles con los puntos del cliente-------"<<std::endl;
+        int contador=0;
+        vector<Premio> premiosDisponibles;
+        for(int a=0;a<premios.size();a++){
+            if(puntosCliente>=premios[a].puntosMinimos){
+                std::cout<<contador<<") Premio: "<<premios[a].nombre<<" || Puntos: "<<premios[a].puntosMinimos<<std::endl;
+                premiosDisponibles.push_back(premios[a]);
+            }
+            contador++;
+        }
+
+        bool salir=true;
+        int smallIndex;
+        int puntosPe=premiosDisponibles[0].puntosMinimos;
+        int maximoPremios=0;
+        std::cout<<std::endl<<"La cantidad de premios maximo que se puede comprar con los puntos actuales son: "<<std::endl;
+        while(true){
+            salir=true;
+            for(int a=0;a<premiosDisponibles.size();a++){
+                if(premiosDisponibles[a].puntosMinimos==0){
+                    continue;
+                }
+                else{
+                    if(premiosDisponibles[a].puntosMinimos<puntosPe){
+                        puntosPe=premiosDisponibles[a].puntosMinimos;
+                        salir=false;
+                        smallIndex=a;
+                        premiosDisponibles[a].puntosMinimos=0;
+                    }
+                }
+            }
+            if(puntosCliente>=puntosPe){
+                puntosCliente-=puntosPe;
+                std::cout<<premiosDisponibles[smallIndex].nombre<<" --- ";
+                maximoPremios++;
+            }
+            if(salir){
+                break;
+            }
+        }
+        std::cout<<std::endl<<"(Max: "<<maximoPremios<<")"<<std::endl;
+    }
 
 }; GestorClientes gestor;
 
@@ -984,7 +1040,7 @@ void gestionDestinos() {
         cout << "1. Cargar datos del grafo (json)\n";
         cout << "2. Agregar destino (Vértice)\n";
         cout << "3. Eliminar destino (Vértice)\n";
-        cout << "4. Modificar Rutas entre destinos (agregar, eliminar y modificar tiempo ruta)\n";
+        cout << "4. Modificar Rutas entre destinos (agregar, eliminar y modificar ruta)\n";
         cout << "5. Guardar datos\n";
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
@@ -1577,8 +1633,9 @@ void gestionClientes() {
                 }
                 continue;
             }
-            case 6: { //6. Canjear premio
+            case 6: { //6. Canjear premio //FALTA
                 string nombreCliente;
+                int indexPremioCanje;
                 while(true){
                     clearScreen();
                     if(gestor.clientes.empty()){
@@ -1590,7 +1647,31 @@ void gestionClientes() {
                     std::cout<<std::endl<<std::endl<<"Escriba el nombre del cliente al cual se desea canjear un premio: ";
                     getline(std::cin,nombreCliente);
                     if(gestor.buscarCliente(nombreCliente)!=NULL){
-
+                        clearScreen();
+                        Cliente*tempCliente=gestor.buscarCliente(nombreCliente);
+                        std::cout<<"Nombre: "<<tempCliente->nombre<<" || Puntos: "<<tempCliente->puntosAcumulados<<std::endl;
+                        if(tempCliente->puntosAcumulados==0){
+                            std::cout<<"Sin premios disponibles para canjear, volviendo al menú..."<<std::endl;
+                            sleep(2);
+                            break;
+                        }
+                        gestor.imprimirPremiosDisponiblesComprar(tempCliente->puntosAcumulados);
+                        std::cout<<std::endl<<"Introduzca el número del premio a canjear: ";
+                        cin >> indexPremioCanje;
+                        cin.ignore(10000, '\n');
+                        try{
+                            clearScreen();
+                            string nombrePremio=gestor.premios[indexPremioCanje].nombre;
+                            gestor.canjearPremio(nombreCliente,nombrePremio);
+                            std::cout<<"Premio canjeado con éxito, el cliente "<<gestor.buscarCliente(nombreCliente)->nombre<<" ahora tiene un total de "<<gestor.buscarCliente(nombreCliente)->puntosAcumulados<<". Volviendo al menú..."<<std::endl;
+                            sleep(3);
+                            break;
+                        }
+                        catch(int a){
+                            std::cout<<"El número digitado es inválido, volviendo al menú..."<<std::endl;
+                            break;
+                        }
+                        break;
                     }
                     else{
                         clearScreen();
@@ -1609,7 +1690,7 @@ void gestionClientes() {
                 continue;
             }
             case 0: cout << "Volviendo al menú principal...\n"; break;
-            default: cout << "Opción inválida, intente de nuevo\n";
+            default: cout << "Opción inválida, intente de nuevo\n"; continue;
         }
     } while (opcion != 0);
 }
@@ -1635,16 +1716,25 @@ void gestionPremios() {
                 int costoPuntos;
                 while(true){
                     clearScreen();
-                    gestor.imprimirListaPremios();
+                    if(!gestor.imprimirListaPremios()){
+                        std::cout<<std::endl<<"Volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        break;
+                    }
                     std::cout<<std::endl<<std::endl<<"Ingrese el nombre del premio a insertar (No puede ser repetido): ";
                     getline(std::cin,nombrePremio);
+                    bool romper=false;
                     for(int e=0;e<gestor.premios.size();e++){
                         if(gestor.premios[e].nombre==nombrePremio){
                             clearScreen();
-                            std::cout<<"El nombre del premio a insertar ya está en uso, por favor vuelva a intentarlo..."<<std::endl;
+                            std::cout<<"El nombre del premio a insertar ya está en uso, volviendo al menú..."<<std::endl;
                             sleep(2);
-                            continue;
+                            romper=true;
+                            break;
                         }
+                    }
+                    if(romper){
+                        break;
                     }
                     clearScreen();
                     std::cout<<"Ingrese el valor en puntos del premio a insertar: ";
@@ -1839,21 +1929,21 @@ void reportes() {
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
                 cin.get();
-                break;
+                continue;
             }
             case 5: { //5. Imprimir clientes con viajes
                 gestor.imprimirClientesConViajes();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
                 cin.get();
-                break;
+                continue;
             }
             case 6: { //6. Imprimir clientes con premios
                 gestor.imprimirClientesConPremios();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
                 cin.get();
-                break;
+                continue;
             }
             case 7: { //7. Imprimir lista de premios
                 gestor.imprimirListaPremios();
@@ -1922,7 +2012,7 @@ int main(){
     return 0;
 
     //-----------------------------------------------------------------------------------------------------------
-    
+    /*
     int opcion1;
     bool carga=false;
     while(true){
@@ -2549,6 +2639,7 @@ int main(){
 
         }
     }
+    
     /*ifstream jsonFilePrueba("json\\DatosDestinoRuta.json");
     nlohmann::json dataJson = nlohmann::json::parse(jsonFilePrueba);
 
