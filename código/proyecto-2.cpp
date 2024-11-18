@@ -17,6 +17,16 @@
 using namespace std;
 //using json = nlohmann::json;
 
+//------------------------------------------------PROTOTIPOS------------------------------------------------
+//------------------------------------------------PROTOTIPOS------------------------------------------------
+//------------------------------------------------PROTOTIPOS------------------------------------------------
+struct verticeOrigen; 
+verticeOrigen *   buscarVertice(string);
+bool revisarRepetidoRuta(string tal[3],string);
+ 
+
+
+
 //----------------------------------------------STRUCT & CLASS----------------------------------------------
 //----------------------------------------------STRUCT & CLASS----------------------------------------------
 //----------------------------------------------STRUCT & CLASS----------------------------------------------
@@ -182,6 +192,8 @@ public:
         Cliente* cliente = buscarCliente(nombreCliente);
         if (cliente) {
             cliente->agregarDestino(destino,puntos);
+            verticeOrigen*temp=buscarVertice(destino);
+            temp->cantidadVisitas++;
         }
     }
 
@@ -191,7 +203,7 @@ public:
         for (const Premio& premio : premios) {
             if (premio.nombre == nombrePremio) {
                 if (cliente && cliente->canjearPremio(premio)) {
-                    std::cout << "Premio canjeado con éxito.\n";
+                    std::cout<<"Premio canjeado con éxito, el cliente "<<buscarCliente(nombreCliente)->nombre<<" ahora tiene un total de "<<buscarCliente(nombreCliente)->puntosAcumulados<<". Volviendo al menú..."<<std::endl;
                 } else {
                     std::cout << "No tiene puntos suficientes.\n";
                 }
@@ -371,31 +383,37 @@ public:
 
         bool salir=true;
         int smallIndex;
-        int puntosPe=premiosDisponibles[0].puntosMinimos;
+        int puntosPe=0;
         int maximoPremios=0;
-        std::cout<<std::endl<<"La cantidad de premios maximo que se puede comprar con los puntos actuales son: "<<std::endl;
+        std::cout<<std::endl<<"La cantidad de premios MÁXIMO que se puede comprar con los puntos actuales son: "<<std::endl;
         while(true){
             salir=true;
             for(int a=0;a<premiosDisponibles.size();a++){
                 if(premiosDisponibles[a].puntosMinimos==0){
                     continue;
                 }
+                else if(puntosPe==0){
+                    puntosPe=premiosDisponibles[a].puntosMinimos;
+                    salir=false;
+                    smallIndex=a;
+                }
                 else{
                     if(premiosDisponibles[a].puntosMinimos<puntosPe){
                         puntosPe=premiosDisponibles[a].puntosMinimos;
                         salir=false;
                         smallIndex=a;
-                        premiosDisponibles[a].puntosMinimos=0;
                     }
                 }
             }
+            if(salir){
+                break;
+            }
+            premiosDisponibles[smallIndex].puntosMinimos=0;
             if(puntosCliente>=puntosPe){
                 puntosCliente-=puntosPe;
                 std::cout<<premiosDisponibles[smallIndex].nombre<<" --- ";
                 maximoPremios++;
-            }
-            if(salir){
-                break;
+                puntosPe=0;
             }
         }
         std::cout<<std::endl<<"(Max: "<<maximoPremios<<")"<<std::endl;
@@ -930,17 +948,21 @@ void imprimirDestinosSinVisitas(){
 
 //Variables globales para consultas
 map<string,int> cantidadDePuntosPorRuta; //Las rutas disponibles de un punto a otro se almacena aquí
+map<string,int> cantidadDeHorasPorRuta; //La cantidad de horas por cada ruta (Esto nos ayudara a determinar la ruta con menor cantidad de tiempo)
+map<string,int> rutasMasFrecuentes; //Cada que una ruta sea seleccionada esta se guarda aqui 
 map<int,string> indiceRuta;
 int contadorIndiceRuta=0;   
 
-// 1.1)Mostrar todas las rutas posibles del origen X a un destino Y. Solicitarle al usuario el medio que desea usar, puede indicar un solo medio y/o dos medios que podrían combinarse durante la ruta.
-void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string ruta,int cantidadPuntos,map<string,bool> mediosDeTransporteNoPermitidos){
+//---------------1--------------
+// 1.1) Mostrar todas las rutas posibles del origen X a un destino Y. Solicitarle al usuario el medio que desea usar, puede indicar un solo medio y/o dos medios que podrían combinarse durante la ruta.
+void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string ruta,int cantidadPuntos,map<string,bool> mediosDeTransporteNoPermitidos,int cantidadHoras){
     if((origen==NULL) || (origen->visitado==true)){
         return; 
     }
 
     if(origen->nombreOrigen==destino){
         cantidadDePuntosPorRuta[ruta]=cantidadPuntos;
+        cantidadDeHorasPorRuta[ruta]=cantidadHoras;
         indiceRuta[contadorIndiceRuta]=ruta;
         contadorIndiceRuta++;
         //std::cout<<"Si llege"<<std::endl;
@@ -964,11 +986,42 @@ void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string 
             else if(tempA->medioDeTransporte=="barco" || tempA->medioDeTransporte=="Barco"){
                 cantidadPuntos+=70*tempA->horasDeRuta;
             }
-            imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+tempA->destino->nombre,cantidadPuntos,mediosDeTransporteNoPermitidos);
+            imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+tempA->destino->nombre,cantidadPuntos,mediosDeTransporteNoPermitidos,cantidadHoras+=tempA->horasDeRuta);
             tempA=tempA->sigA;
         }
     }
     origen->visitado=false;
+
+}
+// 1.2) Mostrar la ruta más corta en tiempo de duración de un origen X a un destino Y. Mostrar nombre del lugar, medio, tiempo, destino, de todos los arcos que forman la ruta. Además, por cada ruta que se muestre debe indicarle el total de puntos que se otorgarían si toma la ruta y la duración total del viaje. El usuario debe indicar si toma la ruta o no. En caso de tomar la ruta se debe registrar el viaje y acumulación de puntos.
+void determinarRutaMasCortaTiempo(){
+    string rutaMasCorta;
+    int horas;
+    for(auto par : cantidadDeHorasPorRuta){
+        if(par.second<horas){
+            rutaMasCorta=par.first;
+            horas=par.second;
+        }
+        else if(horas==0){
+            rutaMasCorta=par.first;
+            horas=par.second;
+        }
+    }
+    std::cout<<std::endl<<"La ruta más corta con respecto al tiempo (horas) es: "
+    <<std::endl<<"Ruta: "<<rutaMasCorta<<" || Tiempo: "<<cantidadDeHorasPorRuta[rutaMasCorta]<<std::endl;
+}
+// 1.3) Mostrar la ruta que acumule más puntos de un origen X a un destino Y. Mostrar nombre del lugar, medio, tiempo, destino, de todos los arcos que forman la ruta. Además, por cada ruta que se muestre debe indicarle el total de puntos que se otorgarían si toma la ruta y la duración total del viaje. El usuario debe indicar si toma la ruta o no. En caso de tomar la ruta se debe registrar el viaje y acumulación de puntos.
+void determinarRutaConMayorCantidadDePuntos(){
+    string ruta;
+    int puntosMaximos;
+    for(auto par : cantidadDePuntosPorRuta){
+        if(par.second>puntosMaximos){
+            ruta=par.first;
+            puntosMaximos=par.second;
+        }
+    }
+    std::cout<<std::endl<<"La ruta que acumula la mayor cantidad de puntos es: "
+    <<std::endl<<"Ruta: "<<ruta<<" || Puntos: "<<cantidadDePuntosPorRuta[ruta]<<std::endl;
 
 }
 
@@ -1009,6 +1062,39 @@ map<string,bool> prohibirCiertosTransporte(){
 
 }
 
+// 3)Imprimir las tres rutas más frecuentes de inicio a fin, indicando el nombre de los lugares de la ruta completa. 
+void imprimirRutasMasFrecuentes(){
+    std::cout<<"----------- 3 RUTAS MÁS FRECUENTES -----------"<<std::endl<<std::endl;
+    int masFrecuente=0;
+    string rutas[3];
+    int contador=0;
+    while(true){
+        for(auto par:rutasMasFrecuentes){
+            if(par.second>masFrecuente && revisarRepetidoRuta(rutas,par.first)){
+                masFrecuente=par.second;
+                rutas[contador]=par.first;
+            }
+        }
+        contador++;
+        masFrecuente=0;
+        if(contador==3){
+            break;
+        }
+    }
+    for(int a=0;a<3;a++){
+        std::cout<<a+1<<") Ruta: "<<rutas[a]<<std::endl;
+    }
+    
+}
+
+bool revisarRepetidoRuta(string rutas[3],string rut){
+    for(int a=0;a<3;a++){
+        if(rutas[a]==rut){
+            return false;
+        }
+    }
+    return true;
+}
 
 
 /*---------------------------------------FUNCIONES AXULIARES MENU---------------------------------------
@@ -1574,7 +1660,7 @@ void gestionClientes() {
                                         clearScreen();
                                         map<string,bool> mediosDeTransporteRuta=prohibirCiertosTransporte();
                                         verticeOrigen*realVerticeOrigen=buscarVertice(verticeOrigenn);
-                                        imprimirRutasPorMedioTransporte(realVerticeOrigen,verticeDestino,realVerticeOrigen->nombreOrigen,0,mediosDeTransporteRuta);
+                                        imprimirRutasPorMedioTransporte(realVerticeOrigen,verticeDestino,realVerticeOrigen->nombreOrigen,0,mediosDeTransporteRuta,0);
                                         desmarcar();
                                         int contador=0; 
                                         //clearScreen();   
@@ -1590,6 +1676,12 @@ void gestionClientes() {
                                         if(cantidadDePuntosPorRuta.empty()){
                                             std::cout<<"----------------Sin ruta posibles, digite salir----------------"<<std::endl<<std::endl;
                                         }
+                                        else{
+                                            determinarRutaMasCortaTiempo();
+                                        }
+                                        if(!cantidadDeHorasPorRuta.empty()){
+                                            determinarRutaConMayorCantidadDePuntos();
+                                        }
                                         string opcionRuta;
                                         std::cout<<std::endl<<std::endl<<"Seleccione la ruta deseada para llegar a su destino, o por el contrario escriba 'salir': ";
                                         getline(std::cin,opcionRuta);
@@ -1599,6 +1691,7 @@ void gestionClientes() {
                                             int puntos=cantidadDePuntosPorRuta[indiceRuta[indexExacto]];
                                             gestor.registrarViaje(clienteNombre,verticeDestino,puntos);
                                             std::cout<<"Se registro el viaje hacia "<<verticeDestino<<" del cliente "<<clienteNombre<<" con éxito. Volviendo al menú"<<std::endl;
+                                            rutasMasFrecuentes[indiceRuta[indexExacto]]++;
                                             sleep(2);
                                             break;
                                         }
@@ -1616,6 +1709,7 @@ void gestionClientes() {
                                         sleep(2);        
                                     }
                                 }
+                                break;
                             }
                             else{
                                 clearScreen();
@@ -1631,9 +1725,11 @@ void gestionClientes() {
                         sleep(2);
                     }
                 }
+                cantidadDePuntosPorRuta.clear();
+                cantidadDeHorasPorRuta.clear();
                 continue;
             }
-            case 6: { //6. Canjear premio //FALTA
+            case 6: { //6. Canjear premio 
                 string nombreCliente;
                 int indexPremioCanje;
                 while(true){
@@ -1663,7 +1759,6 @@ void gestionClientes() {
                             clearScreen();
                             string nombrePremio=gestor.premios[indexPremioCanje].nombre;
                             gestor.canjearPremio(nombreCliente,nombrePremio);
-                            std::cout<<"Premio canjeado con éxito, el cliente "<<gestor.buscarCliente(nombreCliente)->nombre<<" ahora tiene un total de "<<gestor.buscarCliente(nombreCliente)->puntosAcumulados<<". Volviendo al menú..."<<std::endl;
                             sleep(3);
                             break;
                         }
@@ -1855,7 +1950,7 @@ void reportes() {
         cout << "3. Imprimir destinos sin visitas\n";
         cout << "4. Imprimir clientes con puntos\n";
         cout << "5. Imprimir clientes con viajes\n";
-        cout << "6. Imprimir clientes con premios\n";
+        cout << "6. Imprimir clientes con premios canjeados\n";
         cout << "7. Imprimir lista de premios\n";
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
@@ -1925,6 +2020,7 @@ void reportes() {
                 continue;  
             }
             case 4: { //4. Imprimir clientes con puntos
+                clearScreen();
                 gestor.imprimirClientesConPuntos();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
@@ -1932,6 +2028,7 @@ void reportes() {
                 continue;
             }
             case 5: { //5. Imprimir clientes con viajes
+                clearScreen();
                 gestor.imprimirClientesConViajes();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
@@ -1939,6 +2036,7 @@ void reportes() {
                 continue;
             }
             case 6: { //6. Imprimir clientes con premios
+                clearScreen();
                 gestor.imprimirClientesConPremios();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
@@ -1946,6 +2044,7 @@ void reportes() {
                 continue;
             }
             case 7: { //7. Imprimir lista de premios
+                clearScreen();
                 gestor.imprimirListaPremios();
                 cout << "Presione enter para continuar...";
                 cin.ignore(10000, '\n');
@@ -1965,16 +2064,136 @@ void consultas() {
         clearScreen();
         cout <<"---Consultas---\n";
         cout << "1. Mostrar rutas de un origen a un destino\n";
-        cout << "2. Ver rutas más frecuentes\n";
-        cout << "3. Ver rutas únicas\n";
+        cout << "2. Ver las tres rutas más frecuentes\n";
+        cout << "3. Ver rutas únicas (Que solo se realizaron una vez)\n";
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
         cin >> opcion;
         cin.ignore(10000, '\n');
 
         switch (opcion) {
-            case 1: continue;
-            case 2: continue;
+            case 1: { //1. Mostrar rutas de un origen a un destino
+                string clienteNombre;
+                string verticeOrigenn;
+                string verticeDestino;
+                while(true){
+                    clearScreen();
+                    gestor.imprimirClientesConPuntos();
+                    std::cout<<std::endl<<std::endl<<"Escriba el nombre del cliente a registrarle destino (En caso no haya clientes digite 'salir'): ";
+                    getline(std::cin,clienteNombre);
+                    if(clienteNombre=="Salir" || clienteNombre=="salir"){
+                        break;
+                    }
+                    else if(gestor.buscarCliente(clienteNombre)!=NULL){
+                        while(true){
+                            clearScreen();
+                            if(grafoRutas==NULL || grafoRutas->sigV==NULL){
+                                std::cout<<"La lista de destinos esta vacia, y por lo tanto no se puede realizar una ruta, volviendo al menú..."<<std::endl;
+                                sleep(2);
+                                break;
+                            }
+                            imprimirVertices();
+                            std::cout<<std::endl<<std::endl<<"Escriba el punto de origen desde donde se desea empezar la ruta: ";
+                            getline(std::cin,verticeOrigenn);
+                            if(!comprobarNombreGrafo(verticeOrigenn)){
+                                while(true){
+                                    clearScreen();
+                                    imprimirVertices();
+                                    std::cout<<std::endl<<std::endl<<"Escriba el punto de destino desde donde se desea terminar la ruta: ";
+                                    getline(std::cin,verticeDestino);
+                                    if(!comprobarNombreGrafo(verticeDestino)){
+                                        clearScreen();
+                                        map<string,bool> mediosDeTransporteRuta=prohibirCiertosTransporte();
+                                        verticeOrigen*realVerticeOrigen=buscarVertice(verticeOrigenn);
+                                        imprimirRutasPorMedioTransporte(realVerticeOrigen,verticeDestino,realVerticeOrigen->nombreOrigen,0,mediosDeTransporteRuta,0);
+                                        desmarcar();
+                                        int contador=0; 
+                                        //clearScreen();   
+                                        for(auto par : cantidadDePuntosPorRuta){
+                                            std::cout<<contador<<") Ruta: "<<par.first;
+                                            if(contador<10){
+                                                std::cout<<std::endl<<"   Cantidad de puntos: "<<par.second;
+                                            }
+                                            else{
+                                                std::cout<<std::endl<<"    Cantidad de puntos: "<<par.second;
+                                            }
+                                        }
+                                        if(cantidadDePuntosPorRuta.empty()){
+                                            std::cout<<"----------------Sin ruta posibles, digite salir----------------"<<std::endl<<std::endl;
+                                        }
+                                        else{
+                                            determinarRutaMasCortaTiempo();
+                                        }
+                                        if(!cantidadDeHorasPorRuta.empty()){
+                                            determinarRutaConMayorCantidadDePuntos();
+                                        }
+                                        string opcionRuta;
+                                        std::cout<<std::endl<<std::endl<<"Seleccione la ruta deseada para llegar a su destino, o por el contrario escriba 'salir': ";
+                                        getline(std::cin,opcionRuta);
+                                        try{
+                                            clearScreen();
+                                            int indexExacto=stoi(opcionRuta);
+                                            int puntos=cantidadDePuntosPorRuta[indiceRuta[indexExacto]];
+                                            gestor.registrarViaje(clienteNombre,verticeDestino,puntos);
+                                            std::cout<<"Se registro el viaje hacia "<<verticeDestino<<" del cliente "<<clienteNombre<<" con éxito. Volviendo al menú"<<std::endl;
+                                            sleep(2);
+                                            break;
+                                        }
+                                        catch(int myNum){
+                                            clearScreen();
+                                            std::cout<<"Volviendo al menú..."<<std::endl;
+                                            sleep(2);
+                                            break;
+                                        }
+                                        
+                                    }
+                                    else{
+                                        clearScreen();
+                                        std::cout<<"Punto de origen inválido, volviendo..."<<std::endl;
+                                        sleep(2);        
+                                    }
+                                }
+                                break;
+                            }
+                            else{
+                                clearScreen();
+                                std::cout<<"Punto de origen inválido, volviendo..."<<std::endl;
+                                sleep(2);
+                            }
+                        }      
+                        break;
+                    }
+                    else{
+                        clearScreen();
+                        std::cout<<"Nombre inválido, volviendo..."<<std::endl;
+                        sleep(2);
+                    }
+                }
+                cantidadDePuntosPorRuta.clear();
+                cantidadDeHorasPorRuta.clear();
+                continue;
+            }
+            case 2: { //2. Ver rutas más frecuentes
+                clearScreen();
+                if(rutasMasFrecuentes.empty()){
+                    std::cout<<"No se ha tomado ninguna ruta aún, volviendo al menú..."<<std::endl;
+                    sleep(2);
+                    continue;
+                }
+                else if(rutasMasFrecuentes.size()<3){
+                    std::cout<<"Hay menos de tres rutas tomadas, volviendo al menú..."<<std::endl;
+                    sleep(2);
+                    continue;
+
+                }
+                else{
+                    string cualquierCosa;
+                    imprimirRutasMasFrecuentes();
+                    std::cout<<"Presione cualquier tecla para continuar: "<<std::endl;
+                    getline(std::cin,cualquierCosa);
+                    continue;
+                }
+            }
             case 3: continue;
             case 0: cout << "Volviendo al menú principal...\n"; break;
             default: cout << "Opción inválida, intente de nuevo\n";
