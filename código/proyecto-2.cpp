@@ -329,6 +329,7 @@ public:
                 for (const auto& destino : par.second.destinosVisitados) {
                     std::cout << " - " << destino << "\n";
                 }
+                std::cout<<std::endl;
             }
         }
         if (!hayViajes) {
@@ -345,6 +346,7 @@ public:
                 for (const auto& premio : par.second.premiosObtenidos) {
                     cout << " - " << premio << "\n";
                 }
+                std::cout<<std::endl;
             }
         }
         if (!hayPremios) {
@@ -918,7 +920,7 @@ void profundidad ( verticeOrigen*inicio,int contador=0){
 
         arcoRuta *tempA = inicio->subListaArcos;
         while(tempA != NULL){
-            cout<<contador<<") "<<inicio->nombreOrigen<<" -> "<<tempA->destino->nombre<<" Tiempo: "<<tempA->horasDeRuta<<", ";
+            cout<<contador<<") "<<inicio->nombreOrigen<<" -> "<<tempA->destino->nombre<<" Tiempo: "<<tempA->horasDeRuta<<", "<<std::endl;
             
             profundidad(buscarVertice(tempA->destino->nombre),contador+1);
 
@@ -1098,6 +1100,22 @@ bool revisarRepetidoRuta(string rutas[3],string rut){
         }
     }
     return true;
+}
+
+// 4)Imprimir una ruta que solo se haya realizado una única vez.
+void rutasUnaVez(){
+    std::cout<<"----------------RUTAS REALIZADAS UNA SOLA VEZ----------------"<<std::endl<<std::endl;
+    int contador;
+    if(rutasMasFrecuentes.empty()){
+        std::cout<<"No se han realizado rutas aún"<<std::endl;
+        return;
+    }
+    for(auto par:rutasMasFrecuentes){
+        if(par.second==1){
+            std::cout<<contador<<") "<<par.first<<std::endl;
+        }
+        contador++;
+    }
 }
 
 
@@ -1626,8 +1644,12 @@ void gestionClientes() {
                     for (const string& premio : cliente->premiosObtenidos) {
                         cout << " - " << premio << "\n";
                     }
+                    std::cout<<"Digite cualquier tecla para salir: "<<std::endl;
+                    getline(std::cin,nombre);
                 } else {
                     cout << "Cliente no encontrado.\n";
+                    std::cout<<"Digite cualquier tecla para salir: "<<std::endl;
+                    getline(std::cin,nombre);
                 }
                 continue;
             }
@@ -1698,7 +1720,7 @@ void gestionClientes() {
                                             gestor.registrarViaje(clienteNombre,verticeDestino,puntos);
                                             std::cout<<"Se registro el viaje hacia "<<verticeDestino<<" del cliente "<<clienteNombre<<" con éxito. Volviendo al menú"<<std::endl;
                                             rutasMasFrecuentes[indiceRuta[indexExacto]]++;
-                                            sleep(2);
+                                            sleep(4);
                                             break;
                                         }
                                         catch(...){
@@ -2200,7 +2222,14 @@ void consultas() {
                     continue;
                 }
             }
-            case 3: continue;
+            case 3: { //3. Ver rutas únicas (Que solo se realizaron una vez)
+                string cualquierCosa;
+                clearScreen();
+                rutasUnaVez();
+                std::cout<<"Digite cualquier tecla para continuar..."<<std::endl;
+                getline(std::cin,cualquierCosa);
+                continue;
+            }
             case 0: cout << "Volviendo al menú principal...\n"; break;
             default: cout << "Opción inválida, intente de nuevo\n";
         }
