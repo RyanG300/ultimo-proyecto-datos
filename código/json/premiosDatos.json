@@ -20,6 +20,18 @@
     {
         "nombre": "Teclado red Dragon",
         "puntosMinimos": 100
+    },
+    {
+        "nombre": "CUALQUIER COSA",
+        "puntosMinimos": 999999
+    },
+    {
+        "nombre": "Una manzana",
+        "puntosMinimos": 5
+    },
+    {
+        "nombre": "Descuento en vuelo",
+        "puntosMinimos": 300
     }
     ]
 }

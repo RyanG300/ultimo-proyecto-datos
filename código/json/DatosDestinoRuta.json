@@ -1,5 +1,5 @@
 {"destinosVertice":[
-        {
+        { 
             "nombre": "Ciudad Quesada",
             "puntosDeEntrada":[
             {
@@ -32,6 +32,142 @@
                 "tipo":"Terminal/frontera"   
             }    
         ]
+        },
+        {
+            "nombre": "San francisco",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"South Beach Harbor",
+                "tipo":"Muelle"   
+            },
+            {
+                "nombre":"Aeropuerto Internacional de Oakland",
+                "tipo":"Aeropuerto"   
+            }    
+        ]
+        },
+        {
+            "nombre": "Ciudad de Mexico",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"136D calle",
+                "tipo":"Terminal/frontera"   
+            },
+            {
+                "nombre":"Aeropuerto Internacional de la Ciudad de México",
+                "tipo":"Aeropuerto"   
+            }    
+        ]
+        },
+        {
+            "nombre": "Liverpool",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"Aeropuerto John Lennon de Liverpool",
+                "tipo":"Aeropuerto"   
+            },
+            {
+                "nombre":"Canada Dock",
+                "tipo":"Muelle"   
+            }    
+        ]
+        },
+        {
+            "nombre": "San Petersburgo",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"Новый Порт",
+                "tipo":"Muelle"   
+            },
+            {
+                "nombre":"Аэропорт Ржевка",
+                "tipo":"Aeropuerto"   
+            }    
+        ]
+        },
+        {
+            "nombre": "Estocolmo",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"Försvarsmakten Amfibieregementet Amf 1",
+                "tipo":"Muelle"   
+            },
+            {
+                "nombre":"Luftfartsverket ATS Stockholm-Bromma Flygplats",
+                "tipo":"Aeropuerto"   
+            }    
+        ]
+        },
+        {
+            "nombre": "Atenas",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"Piraeus (Aghios Dionysios E3-1)",
+                "tipo":"Muelle"   
+            },
+            {
+                "nombre":"Ελικοδρόμιο Μαρίνας Φλοίσβου ,Heliport",
+                "tipo":"Aeropuerto"   
+            }    
+        ]
+        },
+        {
+            "nombre": "Roma",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"Porto Turistico di Roma",
+                "tipo":"Muelle"   
+            },
+            {
+                "nombre":"Aeropuerto de Roma-Fiumicino",
+                "tipo":"Aeropuerto"   
+            }    
+        ]
+        },
+        {
+            "nombre": "Bilbao",
+            "puntosDeEntrada":[
+            {
+                "nombre":"parada bus",
+                "tipo":"Terminal/frontera"
+            },
+            {
+                "nombre":"Real Club Marítimo del Abra - Real Sporting Club",
+                "tipo":"Muelle"   
+            },
+            {
+                "nombre":"Aeropuerto de Bilbao",
+                "tipo":"Aeropuerto"   
+            }    
+        ]
         }
     ],
     "rutasArco":[
@@ -40,6 +176,90 @@
             "destino":{"nombre":"Sucre","punto de entrada":"parada bus"},
             "transporte":"auto",
             "horas":5
+        },
+        {
+            "origen": {"nombre":"Atenas","punto de entrada":"Ελικοδρόμιο Μαρίνας Φλοίσβου ,Heliport"},
+            "destino":{"nombre":"Estocolmo","punto de entrada":"Luftfartsverket ATS Stockholm-Bromma Flygplats"},
+            "transporte":"avion",
+            "horas":45
+        },
+        {
+            "origen": {"nombre":"San francisco","punto de entrada":"parada bus"},
+            "destino":{"nombre":"Ciudad de Mexico","punto de entrada":"136D calle"},
+            "transporte":"auto",
+            "horas":13
+        },
+        {
+            "origen": {"nombre":"Liverpool","punto de entrada":"Canada Dock"},
+            "destino":{"nombre":"San Petersburgo","punto de entrada":"Новый Порт"},
+            "transporte":"barco",
+            "horas":35
+        },
+        {
+            "origen": {"nombre":"Ciudad Quesada","punto de entrada":"140 calle"},
+            "destino":{"nombre":"San francisco","punto de entrada":"parada bus"},
+            "transporte":"auto",
+            "horas":24
+        },
+        {
+            "origen": {"nombre":"Sucre","punto de entrada":"parada bus"},
+            "destino":{"nombre":"Ciudad de Mexico","punto de entrada":"136D calle"},
+            "transporte":"auto",
+            "horas":11
+        },
+        {
+            "origen": {"nombre":"Bilbao","punto de entrada":"Aeropuerto de Bilbao"},
+            "destino":{"nombre":"Estocolmo","punto de entrada":"Luftfartsverket ATS Stockholm-Bromma Flygplats"},
+            "transporte":"avion",
+            "horas":3
+        },
+        {
+            "origen": {"nombre":"San Petersburgo","punto de entrada":"Аэропорт Ржевка"},
+            "destino":{"nombre":"Roma","punto de entrada":"Aeropuerto de Roma-Fiumicino"},
+            "transporte":"avion",
+            "horas":2
+        },
+        {
+            "origen": {"nombre":"Ciudad de Mexico","punto de entrada":"Aeropuerto Internacional de la Ciudad de México"},
+            "destino":{"nombre":"Bilbao","punto de entrada":"Aeropuerto de Bilbao"},
+            "transporte":"avion",
+            "horas":4
+        },
+        {
+            "origen": {"nombre":"Roma","punto de entrada":"parada bus"},
+            "destino":{"nombre":"Bilbao","punto de entrada":"parada bus"},
+            "transporte":"auto",
+            "horas":7
+        },
+        {
+            "origen": {"nombre":"Estocolmo","punto de entrada":"parada bus"},
+            "destino":{"nombre":"Atenas","punto de entrada":"parada bus"},
+            "transporte":"auto",
+            "horas":9
+        },
+        {
+            "origen": {"nombre":"Atenas","punto de entrada":"Ελικοδρόμιο Μαρίνας Φλοίσβου ,Heliport"},
+            "destino":{"nombre":"Roma","punto de entrada":"Aeropuerto de Roma-Fiumicino"},
+            "transporte":"avion",
+            "horas":1
+        },
+        {
+            "origen": {"nombre":"Liverpool","punto de entrada":"Canada Dock"},
+            "destino":{"nombre":"San francisco","punto de entrada":"Aeropuerto Internacional de Oakland"},
+            "transporte":"barco",
+            "horas":12
+        },
+        {
+            "origen": {"nombre":"Roma","punto de entrada":"parada bus"},
+            "destino":{"nombre":"San Petersburgo","punto de entrada":"parada bus"},
+            "transporte":"auto",
+            "horas":4
+        },
+        {
+            "origen": {"nombre":"Estocolmo","punto de entrada":"Luftfartsverket ATS Stockholm-Bromma Flygplats"},
+            "destino":{"nombre":"San francisco","punto de entrada":"Aeropuerto Internacional de Oakland"},
+            "transporte":"avion",
+            "horas":9
         }
     ]    
 }

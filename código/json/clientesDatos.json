@@ -10,6 +10,101 @@
         "Descuento en vuelo"
       ],
       "puntosAcumulados": 1250
-    }
+    },
+    {
+      "destinosVisitados": [
+        "Ciudad Quesada",
+        "Sucre"
+      ],
+      "nombre": "Ryan",
+      "premiosObtenidos": [
+        "Un oso de peluche"
+      ],
+      "puntosAcumulados": 200
+    },
+    {
+      "destinosVisitados": [
+        "Estocolmo"
+        
+      ],
+      "nombre": "Sofia",
+      "premiosObtenidos": [
+        "CUALQUIER COSA"
+      ],
+      "puntosAcumulados": 3000
+    },
+    {
+      "destinosVisitados": [
+        "Liverpool"       
+      ],
+      "nombre": "Jordy",
+      "premiosObtenidos": [
+        "Una manzana"
+      ],
+      "puntosAcumulados": 50
+    },
+    {
+      "destinosVisitados": [
+        "San Petersburgo"
+      ],
+      "nombre": "Vladimir",
+      "premiosObtenidos": [
+        "Un télefono samsung A25",
+        "Una casa en Sucre, Ciudad Quesada"
+      ],
+      "puntosAcumulados": 40000
+    },
+    {
+      "destinosVisitados": [
+        "Paris",
+        "Bilbao"
+      ],
+      "nombre": "Anastasia",
+      "premiosObtenidos": [
+        "Descuento en vuelo"
+      ],
+      "puntosAcumulados": 950
+    },
+    {
+      "destinosVisitados": [
+        "Sucre",
+        "Roma"
+      ],
+      "nombre": "Peter",
+      "premiosObtenidos": [
+        "Teclado red Dragon"
+      ],
+      "puntosAcumulados": 340
+    },
+    {
+      "destinosVisitados": [
+        "Madrid"
+      ],
+      "nombre": "Jose",
+      "premiosObtenidos": [
+        "Descuento en vuelo"
+      ],
+      "puntosAcumulados": 50
+    },
+    {
+      "destinosVisitados": [
+        "Atenas"
+      ],
+      "nombre": "Josefina",
+      "premiosObtenidos": [
+        "Vacaciones pagadas"
+      ],
+      "puntosAcumulados": 890
+    },
+    {
+      "destinosVisitados": [
+        "Roma"
+      ],
+      "nombre": "Rosa",
+      "premiosObtenidos": [
+        "CUALQUIER COSA"
+      ],
+      "puntosAcumulados": 12550000
+    }    
   ]
 }

@@ -977,16 +977,20 @@ void imprimirRutasPorMedioTransporte(verticeOrigen*origen,string destino,string 
             tempA=tempA->sigA;    
         }
         else{
+            int puntosCAL;
             if(tempA->medioDeTransporte=="bus" || tempA->medioDeTransporte=="auto"){
-            cantidadPuntos+=25*tempA->horasDeRuta;
+                //cantidadPuntos+=25*tempA->horasDeRuta;
+                puntosCAL=25;
             }
             else if(tempA->medioDeTransporte=="avion" || tempA->medioDeTransporte=="avión"){
-                cantidadPuntos+=100*tempA->horasDeRuta;
+                //cantidadPuntos+=100*tempA->horasDeRuta;
+                puntosCAL=100;
             }
             else if(tempA->medioDeTransporte=="barco" || tempA->medioDeTransporte=="Barco"){
-                cantidadPuntos+=70*tempA->horasDeRuta;
+                //cantidadPuntos+=70*tempA->horasDeRuta;
+                puntosCAL=70;
             }
-            imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+tempA->destino->nombre,cantidadPuntos,mediosDeTransporteNoPermitidos,cantidadHoras+=tempA->horasDeRuta);
+            imprimirRutasPorMedioTransporte(buscarVertice(tempA->destino->nombre),destino,ruta+" -> "+tempA->destino->nombre,cantidadPuntos+puntosCAL*tempA->horasDeRuta,mediosDeTransporteNoPermitidos,cantidadHoras+tempA->horasDeRuta);
             tempA=tempA->sigA;
         }
     }
@@ -1663,15 +1667,17 @@ void gestionClientes() {
                                         imprimirRutasPorMedioTransporte(realVerticeOrigen,verticeDestino,realVerticeOrigen->nombreOrigen,0,mediosDeTransporteRuta,0);
                                         desmarcar();
                                         int contador=0; 
-                                        //clearScreen();   
+                                        //clearScreen();  
+                                        clearScreen(); 
                                         for(auto par : cantidadDePuntosPorRuta){
                                             std::cout<<contador<<") Ruta: "<<par.first;
                                             if(contador<10){
-                                                std::cout<<std::endl<<"   Cantidad de puntos: "<<par.second;
+                                                std::cout<<std::endl<<"   Cantidad de puntos: "<<par.second<<std::endl<<std::endl;
                                             }
                                             else{
-                                                std::cout<<std::endl<<"    Cantidad de puntos: "<<par.second;
+                                                std::cout<<std::endl<<"    Cantidad de puntos: "<<par.second<<std::endl<<std::endl;
                                             }
+                                            contador++;
                                         }
                                         if(cantidadDePuntosPorRuta.empty()){
                                             std::cout<<"----------------Sin ruta posibles, digite salir----------------"<<std::endl<<std::endl;
@@ -1695,7 +1701,7 @@ void gestionClientes() {
                                             sleep(2);
                                             break;
                                         }
-                                        catch(int myNum){
+                                        catch(...){
                                             clearScreen();
                                             std::cout<<"Volviendo al menú..."<<std::endl;
                                             sleep(2);
