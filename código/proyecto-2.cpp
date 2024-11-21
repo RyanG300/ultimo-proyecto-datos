@@ -1118,6 +1118,30 @@ void rutasUnaVez(){
     }
 }
 
+/*------------------------------------------------EXTRAS------------------------------------------------
+//------------------------------------------------EXTRAS------------------------------------------------
+//------------------------------------------------EXTRAS------------------------------------------------*/
+
+void promocionarDestinos(){
+    if(grafoRutas==NULL){
+        return;
+    }
+    verticeOrigen*temp=grafoRutas;
+    int menosVisitado=temp->cantidadVisitas;
+    string nombre=temp->nombreOrigen;
+    while(temp!=NULL){
+        if(temp->cantidadVisitas<menosVisitado){
+            menosVisitado=temp->cantidadVisitas;
+            nombre=temp->nombreOrigen;
+        }
+        temp=temp->sigV;
+    }
+    std::cout<<"   --------------------------------------------------"<<std::endl;
+    std::cout<<"        Te recomendamos visitar: "<<nombre<<std::endl;
+    std::cout<<"   --------------------------------------------------"<<std::endl<<std::endl;
+
+}
+
 
 /*---------------------------------------FUNCIONES AXULIARES MENU---------------------------------------
 //---------------------------------------FUNCIONES AXULIARES MENU---------------------------------------
@@ -1129,6 +1153,8 @@ void mostrarMenuPrincipal() {
     std::cout<<"     ==============================================      "<<std::endl;
     std::cout<<"                     VIAJES Y TAL S.A                    "<<std::endl;
     std::cout<<"     ==============================================      "<<std::endl<<std::endl;
+
+    promocionarDestinos();
 
     cout << "Bienvenido usuario, por favor seleccione la opción deseada: " << endl<<endl;
     cout << "1. Gestión de destinos\n";
