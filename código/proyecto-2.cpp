@@ -775,7 +775,7 @@ bool eliminarArco(string origen,string destino,int indexRuta){
 }
 
 //Imprime todas las rutas que conecten los dos vértices recibidos (Solo arcos no rutas como tal)
-void imprimirRuta(string origen,string destino){ 
+void imprimirRuta(string origen,string destino,bool eliminar=true){ 
     verticeOrigen*temp=grafoRutas;
     int contador=0; //Index exacto de las rutas (arcos)
     while(temp!=NULL){
@@ -790,7 +790,7 @@ void imprimirRuta(string origen,string destino){
                 tempArco=tempArco->sigA;
                 contador++;
             }
-            std::cout<<"Inserte la ruta a eliminar (num): ";
+            std::cout<<((eliminar) ? "Inserte la ruta a eliminar (num): ":"Inserte la ruta a modificar (num): ");
             return;
         }
         temp=temp->sigV;
@@ -1171,7 +1171,7 @@ void gestionDestinos() {
     do {
         clearScreen();
         cout << "---Gestión de destinos---\n";
-        cout << "1. Cargar datos del grafo (json)\n";
+        cout << "1. Cargar datos del grafo (json, solo vertices)\n";
         cout << "2. Agregar destino (Vértice)\n";
         cout << "3. Eliminar destino (Vértice)\n";
         cout << "4. Modificar Rutas entre destinos (agregar, eliminar y modificar ruta)\n";
@@ -1256,6 +1256,7 @@ void gestionDestinos() {
                                         }
                                         }
                                     }
+                                    salir=false;
                                     fronteras[r]=new puntoDeEntrada(nombreFrontera,tipoFrontera);
                                     repeticiones--;
                                     if(repeticiones==0){
@@ -1521,7 +1522,7 @@ void gestionDestinos() {
                                                     std::cin.ignore(10000,'\n');
                                                     clearScreen();
                                                     std::cout<<"Rutas disponibles entre "<<origen<<" y "<<destino<<": "<<std::endl;
-                                                    imprimirRuta(origen,destino);
+                                                    imprimirRuta(origen,destino,false);
                                                     try{
                                                         std::cin>>indexRuta;
                                                         std::cin.ignore(10000,'\n');
@@ -1553,7 +1554,6 @@ void gestionDestinos() {
                                             sleep(2);
                                         }
                                     }
-
                                     continue;
                                 }
                                 case 4:{ //Salir (4)
@@ -1604,7 +1604,7 @@ void gestionClientes() {
     do {
         clearScreen();
         cout <<"---Gestión de clientes---\n";
-        cout << "1. Cargar datos de los clientes\n";
+        cout << "1. Cargar datos de los clientes (json, solo clientes)\n";
         cout << "2. Agregar cliente\n";
         cout << "3. Eliminar cliente\n";
         cout << "4. Buscar Cliente\n";
@@ -1635,6 +1635,7 @@ void gestionClientes() {
                 Cliente* cliente = gestor.buscarCliente(nombre);
                 if (cliente) {
                     cout << "\nCliente agregado con éxito.\n";
+                    sleep(2);
                 }
                 gestionClientes();
                 continue;
@@ -1648,6 +1649,7 @@ void gestionClientes() {
                 Cliente* cliente = gestor.buscarCliente(nombre);
                 if (!cliente) {
                     cout << "\nCliente eliminado con éxito.\n";
+                    sleep(2);
                 }
                 gestionClientes();
                 continue;
@@ -1855,7 +1857,7 @@ void gestionPremios() {
         cout << "2. Modificar premio\n";
         cout << "3. Eliminar premio\n";
         //cout << "4. Ver lista de premios\n";
-        cout << "4. Cargar premios (Datos quemados)\n";
+        cout << "4. Cargar premios (Datos quemados, solo premios)\n";
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
         cin >> opcion;
