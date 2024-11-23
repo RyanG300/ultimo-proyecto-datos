@@ -1806,6 +1806,11 @@ void gestionClientes() {
                         sleep(2);
                         break;
                     }
+                    if(gestor.premios.empty()){
+                        std::cout<<"No hay premios en la base de datos, volviendo al menú..."<<std::endl;
+                        sleep(2);
+                        break;
+                    }
                     gestor.imprimirClientesConPuntos();
                     std::cout<<std::endl<<std::endl<<"Escriba el nombre del cliente al cual se desea canjear un premio: ";
                     getline(std::cin,nombreCliente);
