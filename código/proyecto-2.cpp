@@ -187,6 +187,14 @@ public:
         }
     }
 
+    void imprimirClientes(){
+        std::cout<<"-------------CLIENTES-------------"<<std::endl<<std::endl;
+        int contador=1;
+        for(auto par:clientes){
+            std::cout<<contador<<") Nombre: "<<par.first<<std::endl;
+        }
+    }
+
     // 9) Registrar destino y puntos de viaje a un cliente. Ver Consulta 1.
     void registrarViaje(const string& nombreCliente, const string& destino, int puntos) {
         Cliente* cliente = buscarCliente(nombreCliente);
@@ -1610,7 +1618,7 @@ void gestionClientes() {
         cout << "4. Buscar Cliente\n";
         cout << "5. Registrar destino y acumular puntos\n";
         cout << "6. Canjear premio\n";
-        cout << "7. Guardar datos\n";
+        cout << "7. Guardar datos (Clientes)\n";
         cout << "0. Volver al Menú Principal\n\n";
         cout << "Seleccione una opción: ";
         cin >> opcion;
@@ -1643,6 +1651,7 @@ void gestionClientes() {
             case 3: { //3. Eliminar cliente
                 clearScreen();
                 string nombre;
+                gestor.imprimirClientes();
                 cout << "Ingrese el nombre del cliente a eliminar: ";
                 getline(cin, nombre);
                 gestor.eliminarCliente(nombre);
